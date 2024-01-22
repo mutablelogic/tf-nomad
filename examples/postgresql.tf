@@ -1,11 +1,11 @@
 
 module "postgresql" {
-  source = "github.com/mutablelogic/tf-nomad/openldap"
+  source = "github.com/mutablelogic/tf-nomad/postgresql"
 
   // Required parameters
   dc            = local.datacenter               // Nomad datacenter for the cluster
   namespace     = local.namespace                // Nomad namespace for the cluster
-  hosts         = ["cm2"]                        // Host constraint for the job
+  hosts         = ["server1"]                    // Host constraint for the job
   root_password = local.POSTGRESQL_ROOT_PASSWORD // Password for the 'root' user
 
   // Optional parameters
