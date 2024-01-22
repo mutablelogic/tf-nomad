@@ -75,5 +75,10 @@ Time-series metrics collector, which can be placed on several nodes
    * [Terraform Example](examples/telegraf/telegraf.tf)
    * [Nomad Job](telegraf/nomad/telegraf.hcl)
 
+When setting up your configuration with inputs and outputs, each value needs
+to be JSON encoded, so that the configuration can be passed as a map of strings,
+as Terraform does not support maps of more than one type. See the terraform
+example above for a demonstration of this.
+
 TODO:
   * [ ] Add processors support
