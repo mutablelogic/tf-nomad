@@ -108,8 +108,8 @@ job "mosquitto" {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:/mosquitto/data", var.data == "" ? "/local/data" : var.data),
-          "local/config:/mosquitto/config:ro"
+          format("%s:/mosquitto/data", var.data == "" ? "/alloc/data" : var.data),
+          "/local/config:/mosquitto/config:ro"
         ])
         ports = ["mqtt"]
       }
