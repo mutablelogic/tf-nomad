@@ -28,8 +28,8 @@ Cluster filesystem, which can be spread across multiple nodes.
    * [Terraform Example](examples/seaweedfs/clusterfs.tf)
    * [Nomad Job](seaweedfs/nomad/seaweedfs.hcl)
 
-
 TODO:
+  * [ ] In progress
   * [ ] A lot of testing is needed
 
 ## mosquitto
@@ -90,3 +90,18 @@ Semaphore is a Ansible front-end
    * [Documentation](https://www.semui.co/)
    * [Terraform Example](examples/semaphore.tf)
    * [Nomad Job](semaphore/nomad/semaphore.hcl)
+
+TODO:
+  * [ ] In progress
+  * [ ] LDAP integration
+
+## PostgreSQL
+
+PostgreSQL is a database server
+
+   * [Documentation](https://www.postgresql.org/)
+   * [Terraform Example](examples/postgresql.tf)
+   * [Nomad Job](postgresql/nomad/postgresql.hcl)
+
+TODO:
+  * [ ] LDAP integration
