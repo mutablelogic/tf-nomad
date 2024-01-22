@@ -9,7 +9,8 @@ module "postgresql" {
   root_password = local.POSTGRESQL_ROOT_PASSWORD // Password for the 'root' user
 
   // Optional parameters
-  enabled  = true      // If false, no-op
-  port     = 5432      // Port to expose
-  database = "default" // Default database name
+  enabled  = true                  // If false, no-op
+  port     = 5432                  // Port to expose
+  database = "default"             // Default database name
+  data     = "/var/lib/postgresql" // Persistence directory
 }
