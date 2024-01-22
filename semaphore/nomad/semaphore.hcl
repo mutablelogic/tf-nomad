@@ -1,6 +1,6 @@
 
-// OpenLDAP server
-// Docker Image: https://bitnami.com/stack/openldap
+// Semaphore CI/CD
+// Docker Image: semaphoreui/semaphore:latest
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
@@ -42,28 +42,24 @@ variable "docker_always_pull" {
 variable "port" {
   description = "Port for plaintext connections"
   type        = number
-  default     = 389
+  default     = 3000
 }
 
 variable "data" {
   description = "Data persistence directory"
   type        = string
+  default     = ""
 }
 
 variable "admin_password" {
-  description = "LDAP admin password"
-  type        = string
-}
-
-variable "basedn" {
-  description = "Distinguished name"
+  description = "Password for the admin user"
   type        = string
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
-job "openldap" {
+job "semaphore" {
   type        = "service"
   datacenters = var.dc
   namespace   = var.namespace
@@ -76,7 +72,7 @@ job "openldap" {
 
   /////////////////////////////////////////////////////////////////////////////////
 
-  group "openldap" {
+  group "semaphore" {
     count = length(var.hosts)
 
     constraint {
@@ -86,41 +82,57 @@ job "openldap" {
     }
 
     network {
-      port "ldap" {
+      port "http" {
         static = var.port
-        to     = 389
+        to     = 3000
+      }
+      port "postgres" {
+        to = 5432
       }
     }
 
     service {
-      tags     = ["ldap"]
-      name     = "ldap"
-      port     = "ldap"
+      tags     = ["http", "semaphore"]
+      name     = "semaphore-http"
+      port     = "http"
       provider = var.service_provider
+    }
+
+    task "key" {
+      driver = "raw_exec"
+      config {
+        command = "sh"
+        args    = ["-c", "head -c32 /dev/urandom | base64 > ../alloc/data/semaphore.key"]
+      }
+      lifecycle {
+        hook    = "prestart"
+        sidecar = false
+      }
     }
 
     task "daemon" {
       driver = "docker"
 
+      env {
+        SEMAPHORE_ADMIN                 = "admin"
+        SEMAPHORE_ADMIN_PASSWORD        = var.admin_password
+        SEMAPHORE_ACCESS_KEY_ENCRYPTION = "testtest" //chomp(file("../alloc/data/semaphore.key"))
+        ANSIBLE_HOST_KEY_CHECKING       = "false"
+        SEMAPHORE_DB_DIALECT            = "bolt"
+        SEMAPHORE_CONFIG_PATH           = "local"
+      }
+
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:/var/lib/openldap", var.data == "" ? "../alloc/data" : var.data)
+          format("%s:/tmp/semaphore", var.data == "" ? "../alloc/data" : var.data)
         ])
-        ports = ["ldap"]
-      }
-
-      env {
-        LDAP_ADMIN_USERNAME    = "admin"
-        LDAP_ADMIN_PASSWORD    = var.admin_password
-        LDAP_PORT_NUMBER       = NOMAD_PORT_ldap
-        LDAP_ROOT              = var.basedn
-        LDAP_ADD_SCHEMAS       = "yes"
-        LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
-        LDAP_SKIP_DEFAULT_TREE = "yes"
+        ports = ["http"]
       }
 
     } // task "daemon"
-  }   // group "openldap"
-}     // job "openldap"
+
+  } // group "semaphore"
+
+} // job "semaphore"

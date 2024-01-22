@@ -37,7 +37,7 @@ TODO:
 MQTT broker, which can be placed on several nodes
 
    * [Documentation](https://mosquitto.org/)
-   * [Terraform Example](examples/mosquitto/mosquitto.tf)
+   * [Terraform Example](examples/mosquitto.tf)
    * [Nomad Job](mosquitto/nomad/mosquitto.hcl)
 
 TODO:
@@ -48,8 +48,8 @@ TODO:
 LDAP server, which can be placed on several nodes
 
    * [Documentation](https://www.openldap.org/)
-   * [Terraform Example](examples/ldap/ldap.tf)
-   * [Nomad Job](ldap/nomad/ldap.hcl)
+   * [Terraform Example](examples/openldap.tf)
+   * [Nomad Job](openldap/nomad/openldap.hcl)
 
 TODO:
   * [ ] Add TLS support
@@ -61,7 +61,7 @@ TODO:
 Time-series database, which can be placed on several nodes
 
    * [Documentation](https://docs.influxdata.com/influxdb/v2/)
-   * [Terraform Example](examples/influxdb/influxdb.tf)
+   * [Terraform Example](examples/influxdb.tf)
    * [Nomad Job](influxdb/nomad/influxdb.hcl)
 
 TODO:
@@ -72,7 +72,7 @@ TODO:
 Time-series metrics collector, which can be placed on several nodes
 
    * [Documentation](https://docs.influxdata.com/telegraf/v1/)
-   * [Terraform Example](examples/telegraf/telegraf.tf)
+   * [Terraform Example](examples/telegraf.tf)
    * [Nomad Job](telegraf/nomad/telegraf.hcl)
 
 When setting up your configuration with inputs and outputs, each value needs
@@ -82,3 +82,11 @@ example above for a demonstration of this.
 
 TODO:
   * [ ] Add processors support
+
+## semaphore
+
+Semaphore is a Ansible front-end
+
+   * [Documentation](https://www.semui.co/)
+   * [Terraform Example](examples/semaphore.tf)
+   * [Nomad Job](semaphore/nomad/semaphore.hcl)

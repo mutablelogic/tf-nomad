@@ -100,7 +100,7 @@ job "influxdb" {
 
     service {
       tags     = ["influxdb", "http"]
-      name     = "http"
+      name     = "influxdb-http"
       port     = "http"
       provider = var.service_provider
     }
