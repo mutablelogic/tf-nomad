@@ -94,7 +94,7 @@ job "mosquitto" {
       driver = "docker"
 
       template {
-        destination = "/mosquitto/config/mosquitto.conf"
+        destination = "/local/mosquitto/mosquitto.conf"
         data        = <<-EOF
           listener             1883
           allow_anonymous      true
@@ -108,7 +108,7 @@ job "mosquitto" {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          var.data != "" ? format("%s:/mosquitto/data", var.data) : "",
+          var.data == "" ? "" : format("%s:/mosquitto/data", var.data),
           "local/mosquitto:/mosquitto/config:ro",
         ])
         ports = ["mqtt"]
