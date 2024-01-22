@@ -13,6 +13,12 @@ variable "namespace" {
   default     = "default"
 }
 
+variable "service_provider" {
+  description = "Service provider, either consul or nomad"
+  type        = string
+  default     = "nomad"
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -100,14 +106,14 @@ job "seaweedfs" {
       tags     = ["http", "seedweedfs", "master"]
       name     = "seaweedfs-master-http"
       port     = "http"
-      provider = "nomad"
+      provider = var.service_provider
     }
 
     service {
       tags     = ["grpc", "seedweedfs", "master"]
       name     = "seaweedfs-master-grpc"
       port     = "grpc"
-      provider = "nomad"
+      provider = var.service_provider
     }
 
     task "weed-master" {
