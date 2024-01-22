@@ -55,3 +55,25 @@ TODO:
   * [ ] Add TLS support
   * [ ] Add replication support 
   * [ ] Add custom schema support
+
+## InfluxDB
+
+Time-series database, which can be placed on several nodes
+
+   * [Documentation](https://docs.influxdata.com/influxdb/v2/)
+   * [Terraform Example](examples/influxdb/influxdb.tf)
+   * [Nomad Job](influxdb/nomad/influxdb.hcl)
+
+TODO:
+  * [ ] Add TLS support
+
+## telegraf
+
+Time-series metrics collector, which can be placed on several nodes
+
+   * [Documentation](https://docs.influxdata.com/telegraf/v1/)
+   * [Terraform Example](examples/telegraf/telegraf.tf)
+   * [Nomad Job](telegraf/nomad/telegraf.hcl)
+
+TODO:
+  * [ ] Add processors support
