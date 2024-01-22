@@ -42,4 +42,5 @@ variable "data" {
 variable "admin_password" {
   description = "Admin password (required)"
   type        = string
+  sensitive   = true
 }

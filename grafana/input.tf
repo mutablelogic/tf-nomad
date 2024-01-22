@@ -29,8 +29,8 @@ variable "hosts" {
 
 variable "port" {
   type        = number
-  description = "Port to expose service"
-  default     = 5432
+  description = "Port to expose plaintext service"
+  default     = 3000
 }
 
 variable "data" {
@@ -39,13 +39,20 @@ variable "data" {
   default     = ""
 }
 
-variable "root_password" {
-  description = "root password (required)"
+variable "admin_password" {
+  description = "Password for 'admin' user (required)"
   type        = string
   sensitive   = true
 }
 
-variable "database" {
-  description = "Default database"
+variable "admin_email" {
+  description = "Email for 'admin' user"
   type        = string
+  default     = ""
+}
+
+variable "anonymous" {
+  description = "Allow anonymous access"
+  type        = bool
+  default     = false
 }

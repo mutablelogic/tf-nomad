@@ -105,3 +105,18 @@ PostgreSQL is a database server
 
 TODO:
   * [ ] LDAP integration
+
+
+## grafana
+
+grafana is a database server
+
+   * [Documentation](https://grafana.com/docs/grafana/latest/)
+   * [Terraform Example](examples/grafana.tf)
+   * [Nomad Job](grafana/nomad/grafana.hcl)
+
+TODO:
+  * [ ] LDAP integration
+  * [ ] Add TLS support
+  * [ ] Data source provisioning
+  * [ ] Dashboard provisioning

@@ -42,6 +42,7 @@ variable "data" {
 variable "admin_password" {
   description = "LDAP admin password (required)"
   type        = string
+  sensitive   = true
 }
 
 variable "basedn" {
