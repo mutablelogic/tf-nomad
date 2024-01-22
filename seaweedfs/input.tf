@@ -48,3 +48,9 @@ variable "webdav" {
   description = "Enable WebDAV service on filers"
   default     = false
 }
+
+variable "docker_tag" {
+  type        = string
+  description = "Version of the docker image to use, defaults to latest"
+  default     = "latest"
+}

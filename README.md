@@ -13,6 +13,7 @@ module "clusterfs" {
     source = "github.com/mutablelogic/tf-nomad/seaweedfs"
     dc = "datacenter"
     namespace = "clusterfs"
+    docker_tag = "latest"
     enabled = true
     metrics = true
     webdav = false
