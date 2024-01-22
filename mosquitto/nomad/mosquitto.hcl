@@ -78,8 +78,8 @@ job "mosquitto" {
 
     network {
       port "mqtt" {
-        static = 1883
-        to     = var.port
+        static = var.port
+        to     = 1883
       }
     }
 
