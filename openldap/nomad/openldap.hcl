@@ -1,5 +1,5 @@
 
-// LDAP server
+// OpenLDAP server
 // Docker Image: https://bitnami.com/stack/openldap
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ variable "basedn" {
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
-job "ldap" {
+job "openldap" {
   type        = "service"
   datacenters = var.dc
   namespace   = var.namespace
@@ -76,7 +76,7 @@ job "ldap" {
 
   /////////////////////////////////////////////////////////////////////////////////
 
-  group "ldap" {
+  group "openldap" {
     count = length(var.hosts)
 
     constraint {
@@ -122,6 +122,5 @@ job "ldap" {
       }
 
     } // task "daemon"
-  }   // group "ldap"
-}     // job "ldap"
-
+  }   // group "openldap"
+}     // job "openldap"

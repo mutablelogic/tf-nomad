@@ -1,7 +1,7 @@
 
 // Example LDAP server, using the bitnami/openldap docker image
-module "ldap" {
-  source = "github.com/mutablelogic/tf-nomad/ldap"
+module "openldap" {
+  source = "github.com/mutablelogic/tf-nomad/openldap"
 
   // Required parameters
   dc             = "datacenter"              // Nomad datacenter for the cluster
@@ -14,5 +14,5 @@ module "ldap" {
   enabled    = true      // If false, no-op
   namespace  = "default" // Nomad namespace for the nomad job
   docker_tag = "latest"  // Pull the latest version of the docker image every job restart
-  port       = 1389      // plaintext port to expose
+  port       = 389       // plaintext port to expose
 }

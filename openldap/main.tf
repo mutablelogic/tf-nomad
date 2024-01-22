@@ -1,7 +1,7 @@
 
 resource "nomad_job" "ldap" {
   count   = var.enabled ? 1 : 0
-  jobspec = file("${path.module}/nomad/ldap.hcl")
+  jobspec = file("${path.module}/nomad/openldap.hcl")
 
   hcl2 {
     allow_fs = true
