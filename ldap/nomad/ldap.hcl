@@ -74,7 +74,7 @@ job "ldap" {
     health_check     = "task_states"
   }
 
-/////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////
 
   group "ldap" {
     count = length(var.hosts)
@@ -99,16 +99,6 @@ job "ldap" {
       provider = var.service_provider
     }
 
-    env {
-      LDAP_ADMIN_USERNAME    = "admin"
-      LDAP_ADMIN_PASSWORD    = var.admin_password
-      LDAP_PORT_NUMBER       = "${NOMAD_PORT_ldap}"
-      LDAP_ROOT              = var.basedn
-      LDAP_ADD_SCHEMAS       = "yes"
-      LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
-      LDAP_SKIP_DEFAULT_TREE = "yes"
-    }
-
     task "daemon" {
       driver = "docker"
 
@@ -120,7 +110,18 @@ job "ldap" {
         ])
         ports = ["ldap"]
       }
+
+      env {
+        LDAP_ADMIN_USERNAME    = "admin"
+        LDAP_ADMIN_PASSWORD    = var.admin_password
+        LDAP_PORT_NUMBER       = NOMAD_PORT_ldap
+        LDAP_ROOT              = var.basedn
+        LDAP_ADD_SCHEMAS       = "yes"
+        LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
+        LDAP_SKIP_DEFAULT_TREE = "yes"
+      }
+
     } // task "daemon"
-  } // group "ldap"
-} // job "ldap"
+  }   // group "ldap"
+}     // job "ldap"
 
