@@ -1,5 +1,5 @@
 
-// Example Cluster filesystem using seaweedfs, with one master, two volumes and one filer
+// Example Cluster filesystem using seaweedfs, with one master, two volumes and three filers
 module "clusterfs" {
   source      = "github.com/mutablelogic/tf-nomad/seaweedfs"
   enabled     = true         // If false, no-op
@@ -32,9 +32,9 @@ module "clusterfs" {
     {
       ip = "192.168.86.11"
     }, {
-      ip = "192.168.86.11"
+      ip = "192.168.86.12"
     }, {
-      ip = "192.168.86.11"
+      ip = "192.168.86.13"
     }
   ]
 }
