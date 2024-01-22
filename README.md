@@ -25,7 +25,7 @@ provider "nomad" {
 Cluster filesystem, which can be spread across multiple nodes.
 
    * [Documentation](https://github.com/seaweedfs/seaweedfs)
-   * [Terraform Example](examples/seaweedfs/clusterfs.tf)
+   * [Terraform Example](examples/seaweedfs/seaweedfs.tf)
    * [Nomad Job](seaweedfs/nomad/seaweedfs.hcl)
 
 TODO:
