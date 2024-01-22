@@ -27,7 +27,7 @@ variable "docker_always_pull" {
 
 variable "masters" {
   description = "Master servers"
-  type        = list(object({ ip = string }))
+  type        = list(object({ ip = string, data = string }))
 }
 
 variable "master_port" {
@@ -56,6 +56,7 @@ locals {
   master_ips             = [for master in var.masters : master.ip]
   master_addrs_http      = [for master in var.masters : format("%s:%d", master.ip, var.master_port)]
   master_addrs_http_grpc = [for master in var.masters : format("%s:%d.%d", master.ip, var.master_port, var.master_port + local.grpc_offset)]
+  master_data            = { for master in var.masters : master.ip => master.data }
 }
 
 ##########################################################################
@@ -115,19 +116,19 @@ job "seaweedfs" {
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
-        args = [
+        args = compact([
           "-logtostderr",
           "master",
           "-ip=${NOMAD_IP_http}",
           "-ip.bind=0.0.0.0",
-          "-peers=${ join(",", local.master_addrs_http) }",
-          "-mdir=/data",
+          "-peers=${join(",", local.master_addrs_http)}",
+          master_data["${NOMAD_IP_http}"] && master_data["${NOMAD_IP_http}"].data ? "-mdir=/data" : "",
           "-port=${NOMAD_PORT_http}",
           "-port.grpc=${NOMAD_PORT_grpc}"
-        ]
-        volumes = [
-          format("%s/master:/data", var.data), // TODO: No data dir
-        ]
+        ])
+        volumes = compact([
+          master_data["${NOMAD_IP_http}"] && master_data["${NOMAD_IP_http}"].data ? format("%s:/data", var.data) : "",
+        ])
         ports      = ["http", "grpc"]
         privileged = true
       }
