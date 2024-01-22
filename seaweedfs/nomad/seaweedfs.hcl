@@ -1,6 +1,6 @@
 
-##########################################################################
-# VARIABLES
+///////////////////////////////////////////////////////////////////////////////
+// VARIABLES
 
 variable "dc" {
   description = "data centers that the job runs in"
@@ -22,7 +22,6 @@ variable "service_provider" {
 variable "docker_image" {
   description = "Docker image"
   type        = string
-  default     = "chrislusf/seaweedfs:latest"
 }
 
 variable "docker_always_pull" {
@@ -33,29 +32,21 @@ variable "docker_always_pull" {
 
 variable "masters" {
   description = "Master servers"
-  type        = list(object({ ip = string, data = string }))
+  type        = list(object({ ip = string, data = string, replication = string, http_port = number, grpc_port = number, metrics_port = number }))
 }
 
-variable "master_port" {
-  description = "Port for masters"
-  type        = number
-  default     = 9333
+variable "volumes" {
+  description = "Volume servers"
+  type        = list(object({ ip = string, data = string, rack = string, max = number, http_port = number, grpc_port = number, metrics_port = number }))
 }
 
-variable "filer_port" {
-  description = "Port for filers"
-  type        = number
-  default     = 8888
+variable "filers" {
+  description = "Filer servers"
+  type        = list(object({ ip = string, data = string, http_port = number, grpc_port = number, metrics_port = number, s3_port = number, webdav_port = number }))
 }
 
-variable "volume_port" {
-  description = "Port for volumes"
-  type        = number
-  default     = 8889
-}
-
-##########################################################################
-# LOCALS
+///////////////////////////////////////////////////////////////////////////////
+// LOCALS
 
 locals {
   grpc_offset            = 10000
@@ -63,10 +54,11 @@ locals {
   master_addrs_http      = [for master in var.masters : format("%s:%d", master.ip, var.master_port)]
   master_addrs_http_grpc = [for master in var.masters : format("%s:%d.%d", master.ip, var.master_port, var.master_port + local.grpc_offset)]
   master_data            = { for master in var.masters : master.ip => master.data }
+  master_metrics_port    = { for master in var.masters : master.ip => master.metrics_port }
 }
 
-##########################################################################
-# JOB
+///////////////////////////////////////////////////////////////////////////////
+// JOB
 
 job "seaweedfs" {
   type        = "service"
@@ -79,7 +71,7 @@ job "seaweedfs" {
     health_check     = "task_states"
   }
 
-  ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
   group "master" {
     count = length(var.masters)
