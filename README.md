@@ -43,9 +43,9 @@ MQTT broker, which can be placed on several nodes
 TODO:
   * [ ] Add TLS support
 
-## LDAP
+## OpenLDAP
 
-LDAP server, which can be placed on several nodes
+OpenLDAP server, which can be placed on several nodes
 
    * [Documentation](https://www.openldap.org/)
    * [Terraform Example](examples/openldap.tf)
