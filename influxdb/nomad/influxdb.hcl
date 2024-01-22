@@ -46,8 +46,9 @@ variable "port" {
 }
 
 variable "data" {
-  description = "Data persistence directory"
+  description = "Data persistence directory (optional)"
   type        = string
+  default     = ""
 }
 
 variable "organization" {
@@ -98,7 +99,7 @@ job "influxdb" {
     }
 
     service {
-      tags     = ["influxdb"]
+      tags     = ["influxdb", "http"]
       name     = "http"
       port     = "http"
       provider = var.service_provider
@@ -107,11 +108,24 @@ job "influxdb" {
     task "daemon" {
       driver = "docker"
 
+      template {
+        destination = "local/config/config.yml"
+        data        = <<-EOF
+            secret-store: bolt
+            engine-path: /var/lib/influxdb/engine
+            bolt-path: /var/lib/influxdb/influxd.bolt
+            sqlite-path: /var/lib/influxdb/influxd.sqlite
+            http-bind-address: :8086
+            ui-disabled: false
+        EOF
+      }
+
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:/var/lib/influxdb2", var.data == "" ? "/alloc/data" : var.data)
+          format("%s:/var/lib/influxdb", var.data == "" ? "../alloc/data" : var.data),
+          "local/config:/etc/influxdb2",
         ])
         ports = ["http"]
       }
