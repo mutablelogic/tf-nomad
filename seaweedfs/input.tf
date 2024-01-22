@@ -6,14 +6,20 @@ variable "dc" {
 
 variable "namespace" {
   type        = string
-  description = "Namespace for the SeaweedFS cluster (optional)"
+  description = "Nomad namespace"
   default     = "default"
 }
 
 variable "enabled" {
   type        = bool
-  description = "Whether to deploy the SeaweedFS cluster"
+  description = "If false, then no job is deployed"
   default     = true
+}
+
+variable "docker_tag" {
+  type        = string
+  description = "Version of the docker image to use, defaults to latest"
+  default     = "latest"
 }
 
 variable "masters" {
@@ -47,10 +53,4 @@ variable "webdav" {
   type        = bool
   description = "Enable WebDAV service on filers"
   default     = false
-}
-
-variable "docker_tag" {
-  type        = string
-  description = "Version of the docker image to use, defaults to latest"
-  default     = "latest"
 }
