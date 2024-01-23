@@ -85,12 +85,15 @@ job "postgresql" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "postgresql" {
-    count = length(var.hosts)
+     count = length(var.hosts) == 0 ? 1 : length(var.hosts)
 
-    constraint {
-      attribute = node.unique.name
-      operator  = "set_contains_any"
-      value     = join(",", var.hosts)
+    dynamic "constraint" {
+      for_each = length(var.hosts) == 0 ? [] : [ join(",", var.hosts) ]
+      content {
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = constraint.value
+      }
     }
 
     network {

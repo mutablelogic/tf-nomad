@@ -24,7 +24,8 @@ variable "docker_tag" {
 
 variable "hosts" {
   type        = list(string)
-  description = "List of hosts to deploy on (required)"
+  description = "List of hosts to deploy on. If empty, one allocation will be created"
+  default     = []
 }
 
 variable "port" {

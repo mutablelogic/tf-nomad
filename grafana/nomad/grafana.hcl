@@ -6,18 +6,18 @@
 // VARIABLES
 
 variable "dc" {
-  description = "data centers that the job runs in"
+  description = "Data centers that the job is eligible to run in"
   type        = list(string)
 }
 
 variable "namespace" {
-  description = "namespace that the job runs in"
+  description = "Namespace that the job runs in"
   type        = string
   default     = "default"
 }
 
 variable "hosts" {
-  description = "host constraint for the job"
+  description = "Host constraint for the job, if empty exactly one allocation will be created"
   type        = list(string)
   default     = []
 }
@@ -81,6 +81,16 @@ variable "anonymous_role" {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  logs_path =  "${NOMAD_ALLOC_DIR}/logs"
+  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
+  plugins_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
+  provisioning_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/provisioning" : "/var/lib/grafana/provisioning"
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // JOB
 
 job "grafana" {
@@ -97,12 +107,15 @@ job "grafana" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "grafana" {
-    count = length(var.hosts)
+    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
 
-    constraint {
-      attribute = node.unique.name
-      operator  = "set_contains_any"
-      value     = join(",", var.hosts)
+    dynamic "constraint" {
+      for_each = length(var.hosts) == 0 ? [] : [ join(",", var.hosts) ]
+      content {
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = constraint.value
+      }
     }
 
     network {
@@ -127,10 +140,10 @@ job "grafana" {
       driver = "docker"
 
       env {
-        GF_PATHS_LOGS              = "${NOMAD_ALLOC_DIR}/logs"
-        GF_PATHS_DATA              = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
-        GF_PATHS_PLUGINS           = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
-        GF_PATHS_PROVISIONING      = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/provisioning" : "/var/lib/grafana/provisioning"
+        GF_PATHS_LOGS              = local.logs_path
+        GF_PATHS_DATA              = local.data_path
+        GF_PATHS_PLUGINS           = local.plugins_path
+        GF_PATHS_PROVISIONING      = local.provisioning_path
         GF_SECURITY_ADMIN_USER     = "admin"
         GF_SECURITY_ADMIN_PASSWORD = var.admin_password
         GF_SECURITY_ADMIN_EMAIL    = var.admin_email
