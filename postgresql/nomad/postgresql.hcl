@@ -85,10 +85,10 @@ job "postgresql" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "postgresql" {
-     count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
 
     dynamic "constraint" {
-      for_each = length(var.hosts) == 0 ? [] : [ join(",", var.hosts) ]
+      for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
       content {
         attribute = node.unique.name
         operator  = "set_contains_any"
@@ -120,9 +120,9 @@ job "postgresql" {
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
-        ports = ["postgresql"]
+        ports      = ["postgresql"]
         volumes = compact([
-          var.data == "" ? "" : format("%s:/var/lib/postgresql",var.data)
+          var.data == "" ? "" : format("%s:/var/lib/postgresql", var.data)
         ])
       }
 

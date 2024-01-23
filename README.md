@@ -20,6 +20,20 @@ provider "nomad" {
 }
 ```
 
+
+## nginx
+
+Web server and reverse proxy, which can be placed on several nodes
+
+   * [Documentation](https://nginx.org/en/)
+   * [Terraform Example](examples/nginx.tf)
+   * [Nomad Job](nginx/nomad/nginx.hcl)
+
+TODO:
+  * [ ] In progress
+  * [ ] Add TLS certificate support
+  * [ ] Not sure how we can integrate with nomad services
+
 ## seaweedfs
 
 Cluster filesystem, which can be spread across multiple nodes.
