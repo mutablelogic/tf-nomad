@@ -66,6 +66,10 @@ variable "admin_password" {
   type        = string
 }
 
+locals {
+  DATA_PATH = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/influxdb/"
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
@@ -105,16 +109,25 @@ job "influxdb" {
       provider = var.service_provider
     }
 
+    ephemeral_disk {
+      migrate = true
+    }
+
     task "daemon" {
       driver = "docker"
+
+      meta {
+        data_path = local.DATA_PATH
+      }
+
 
       template {
         destination = "local/config/config.yml"
         data        = <<-EOF
             secret-store: bolt
-            engine-path: /var/lib/influxdb/engine
-            bolt-path: /var/lib/influxdb/influxd.bolt
-            sqlite-path: /var/lib/influxdb/influxd.sqlite
+            engine-path: {{ env "NOMAD_META_data_path" }}/engine
+            bolt-path:  {{  env "NOMAD_META_data_path"  }}/influxd.bolt
+            sqlite-path:  {{ env "NOMAD_META_data_path" }}/influxd.sqlite
             http-bind-address: :8086
             ui-disabled: false
         EOF
@@ -124,7 +137,7 @@ job "influxdb" {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:/var/lib/influxdb", var.data == "" ? "../alloc/data" : var.data),
+          var.data == "" ? "" : format("%s:/var/lib/influxdb", var.data),
           "local/config:/etc/influxdb2",
         ])
         ports = ["http"]

@@ -119,14 +119,18 @@ job "grafana" {
       provider = var.service_provider
     }
 
+    ephemeral_disk {
+      migrate = true
+    }
+
     task "daemon" {
       driver = "docker"
 
       env {
         GF_PATHS_LOGS              = "${NOMAD_ALLOC_DIR}/logs"
-        GF_PATHS_DATA              = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/grafana/data"
-        GF_PATHS_PLUGINS           = var.data == "" ? "${NOMAD_ALLOC_DIR}/plugins" : "/var/lib/grafana/plugins"
-        GF_PATHS_PROVISIONING      = var.data == "" ? "${NOMAD_ALLOC_DIR}/provisioning" : "/var/lib/grafana/provisioning"
+        GF_PATHS_DATA              = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
+        GF_PATHS_PLUGINS           = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
+        GF_PATHS_PROVISIONING      = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/provisioning" : "/var/lib/grafana/provisioning"
         GF_SECURITY_ADMIN_USER     = "admin"
         GF_SECURITY_ADMIN_PASSWORD = var.admin_password
         GF_SECURITY_ADMIN_EMAIL    = var.admin_email
