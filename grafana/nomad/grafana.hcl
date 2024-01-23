@@ -85,7 +85,7 @@ variable "anonymous_role" {
 
 locals {
   logs_path =  "${NOMAD_ALLOC_DIR}/logs"
-  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
+  db_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
   plugins_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
   provisioning_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/provisioning" : "/var/lib/grafana/provisioning"
 }
@@ -141,7 +141,7 @@ job "grafana" {
 
       env {
         GF_PATHS_LOGS              = local.logs_path
-        GF_PATHS_DATA              = local.data_path
+        GF_PATHS_DATA              = local.db_path
         GF_PATHS_PLUGINS           = local.plugins_path
         GF_PATHS_PROVISIONING      = local.provisioning_path
         GF_SECURITY_ADMIN_USER     = "admin"
