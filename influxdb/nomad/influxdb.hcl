@@ -66,8 +66,11 @@ variable "admin_password" {
   type        = string
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
 locals {
-  DATA_PATH = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/influxdb/"
+  DATA_PATH = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/influxdb"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,14 +123,13 @@ job "influxdb" {
         data_path = local.DATA_PATH
       }
 
-
       template {
         destination = "local/config/config.yml"
         data        = <<-EOF
             secret-store: bolt
             engine-path: {{ env "NOMAD_META_data_path" }}/engine
-            bolt-path:  {{  env "NOMAD_META_data_path"  }}/influxd.bolt
-            sqlite-path:  {{ env "NOMAD_META_data_path" }}/influxd.sqlite
+            bolt-path: {{  env "NOMAD_META_data_path"  }}/influxd.bolt
+            sqlite-path: {{ env "NOMAD_META_data_path" }}/influxd.sqlite
             http-bind-address: :8086
             ui-disabled: false
         EOF

@@ -99,6 +99,10 @@ job "openldap" {
       provider = var.service_provider
     }
 
+    ephemeral_disk {
+      migrate = true
+    }
+
     task "daemon" {
       driver = "docker"
 
@@ -106,10 +110,12 @@ job "openldap" {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:/var/lib/openldap", var.data == "" ? "../alloc/data" : var.data)
+          var.data == "" ? "" : format("%s:/bitnami/openldap",var.data)
         ])
         ports = ["ldap"]
       }
+
+      // TODO: /bitnami/openldap should be /alloc/data when var.data is empty
 
       env {
         LDAP_ADMIN_USERNAME    = "admin"

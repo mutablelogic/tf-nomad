@@ -52,6 +52,13 @@ variable "data" {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  DATA_PATH = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/mosquitto/data"
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // JOB
 
 job "mosquitto" {
@@ -90,8 +97,16 @@ job "mosquitto" {
       provider = var.service_provider
     }
 
+    ephemeral_disk {
+      migrate = true
+    }
+
     task "daemon" {
       driver = "docker"
+
+      meta {
+        data_path = local.DATA_PATH
+      }
 
       template {
         destination = "/local/config/mosquitto.conf"
@@ -99,7 +114,7 @@ job "mosquitto" {
           listener             1883
           allow_anonymous      true
           persistence          true
-          persistence_location /mosquitto/data
+          persistence_location {{ env "NOMAD_META_data_path" }}
           log_dest             stderr
         EOF
       }
@@ -108,7 +123,7 @@ job "mosquitto" {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:/mosquitto/data", var.data == "" ? "../alloc/data" : var.data),
+          var.data == "" ? "" : format("%s:/mosquitto/data",var.data),
           "local/config:/mosquitto/config:ro"
         ])
         ports = ["mqtt"]

@@ -62,6 +62,13 @@ variable "database" {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql"
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // JOB
 
 job "postgresql" {
@@ -100,6 +107,10 @@ job "postgresql" {
       provider = var.service_provider
     }
 
+    ephemeral_disk {
+      migrate = true
+    }
+
     task "server" {
       driver = "docker"
 
@@ -108,7 +119,7 @@ job "postgresql" {
         force_pull = var.docker_always_pull
         ports = ["postgresql"]
         volumes = compact([
-          format("%s:/var/lib/postgresql", var.data == "" ? "" : var.data)
+          var.data == "" ? "" : format("%s:/var/lib/postgresql",var.data)
         ])
       }
 
@@ -116,7 +127,7 @@ job "postgresql" {
         POSTGRES_USER     = "root"
         POSTGRES_PASSWORD = var.root_password
         POSTGRES_DB       = var.database
-        PGDATA            = var.data == "" ? format("%s/data",NOMAD_ALLOC_DIR) : "/var/lib/postgresql/data"
+        PGDATA            = local.data_path
       }
 
     } // task "server"
