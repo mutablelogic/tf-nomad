@@ -154,7 +154,7 @@ job "openldap" {
       dynamic "template" {
         for_each = var.schema
         content {
-          destination = "${local.schema_path}/${template.key}.schema"
+          destination = "${local.schema_path}/${template.key}.ldif"
           data        = template.value
         }
       }
