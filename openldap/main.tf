@@ -13,10 +13,17 @@ resource "nomad_job" "ldap" {
       hosts              = jsonencode(var.hosts)
       port               = var.port
       data               = var.data
-      ldif               = var.ldif
-      schema             = var.schema
       admin_password     = var.admin_password
       basedn             = var.basedn
+      organization       = var.organization
+
+      # LDIF templates which are only applied when the data directory is empty (first run)
+      ldif = jsonencode({
+        "root" = file("${path.module}/ldif/root.ldif")
+      })
+      schema = jsonencode({
+        "rfc2307bis" = file("${path.module}/schema/rfc2307bis.ldif")
+      })
     }
   }
 }

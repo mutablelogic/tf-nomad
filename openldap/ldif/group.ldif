@@ -1,0 +1,8 @@
+dn: cn={{ env "NOMAD_META_group" }},ou={{ env "NOMAD_META_groups" }},{{ env "NOMAD_META_basedn" }}
+cn: {{ env "NOMAD_META_group" }}
+gidNumber: {{ env "NOMAD_META_gid" }}
+objectClass: posixGroup
+objectClass: groupOfMembers
+objectClass: top
+description: {{ env "NOMAD_META_description" }}
+

@@ -46,18 +46,25 @@ variable "port" {
 }
 
 variable "data" {
-  description = "Data persistence directory, required"
+  description = "Data persistence directory"
   type        = string
+  default     = ""
 }
 
 variable "ldif" {
-  description = "Path to custom LDIF files, optional"
-  type        = string
+  description = "Custom LDIF rules, optional"
+  type        = map(string)
 }
 
 variable "schema" {
-  description = "Path to custom schema files, optional"
+  description = "Custom schemas, optional"
+  type        = map(string)
+}
+
+variable "extra_schemas" {
+  description = "Extra schemas, optional"
   type        = string
+  default     = "cosine,inetorgperson"
 }
 
 variable "admin_password" {
@@ -70,13 +77,17 @@ variable "basedn" {
   type        = string
 }
 
+variable "organization" {
+  description = "Organization name"
+  type        = string
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
 locals {
-  data_path   = "/bitnami/openldap"
-  ldif_path   = var.ldif == "" ? "" : "/ldap/ldif"
-  schema_path = var.schema == "" ? "" : "/ldap/schema"
+  ldif_path   = "${NOMAD_ALLOC_DIR}/data/ldif"
+  schema_path = "${NOMAD_ALLOC_DIR}/data/schema"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,18 +138,33 @@ job "openldap" {
 
     task "daemon" {
       driver = "docker"
+      user   = "root"
 
-      config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        volumes = compact([
-          local.ldif_path == "" ? "" : format("%s:%s", var.ldif, local.ldif_path),
-          local.schema_path == "" ? "" : format("%s:%s", var.schema, local.schema_path)
-        ])
-        ports = ["ldap"]
+      // Metadata for ldif and schema templates
+      meta {
+        basedn       = var.basedn
+        organization = var.organization
+        users        = "users"
+        groups       = "groups"
       }
 
-      // TODO: /bitnami/openldap should be /alloc/data when var.data is empty
+      // LDIF templates
+      dynamic "template" {
+        for_each = var.ldif
+        content {
+          destination = "${local.ldif_path}/${template.key}.ldif"
+          data        = template.value
+        }
+      }
+
+      // Schema templates
+      dynamic "template" {
+        for_each = var.schema
+        content {
+          destination = "${local.schema_path}/${template.key}.ldif"
+          data        = template.value
+        }
+      }
 
       env {
         LDAP_ADMIN_USERNAME    = "admin"
@@ -146,10 +172,19 @@ job "openldap" {
         LDAP_PORT_NUMBER       = NOMAD_PORT_ldap
         LDAP_ROOT              = var.basedn
         LDAP_ADD_SCHEMAS       = "yes"
-        LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
+        LDAP_EXTRA_SCHEMAS     = var.extra_schemas
         LDAP_SKIP_DEFAULT_TREE = "yes"
         LDAP_CUSTOM_LDIF_DIR   = local.ldif_path
         LDAP_CUSTOM_SCHEMA_DIR = local.schema_path
+      }
+
+      config {
+        image      = var.docker_image
+        force_pull = var.docker_always_pull
+        volumes = compact([
+          var.data == "" ? "" : format("%s:/bitnami/openldap/", var.data),
+        ])
+        ports = ["ldap"]
       }
 
     } // task "daemon"
