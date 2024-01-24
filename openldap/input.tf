@@ -39,16 +39,6 @@ variable "data" {
   description = "Directory for data persistence, required"
 }
 
-variable "ldif" {
-  type        = string
-  description = "Directory for additional ldif files, optional"
-}
-
-variable "schema" {
-  type        = string
-  description = "Directory for additional schema files, optional"
-}
-
 variable "admin_password" {
   description = "LDAP admin password (required)"
   type        = string
@@ -57,5 +47,10 @@ variable "admin_password" {
 
 variable "basedn" {
   description = "LDAP distinguished name (required)"
+  type        = string
+}
+
+variable "organization" {
+  description = "Organization name (required)"
   type        = string
 }
