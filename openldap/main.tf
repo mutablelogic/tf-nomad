@@ -21,7 +21,9 @@ resource "nomad_job" "ldap" {
       ldif = jsonencode({
         "root" = file("${path.module}/ldif/root.ldif")
       })
-      schema = jsonencode({})
+      schema = jsonencode({
+        "rfc2307bis" = file("${path.module}/schema/rfc2307bis.ldif")
+      })
     }
   }
 }

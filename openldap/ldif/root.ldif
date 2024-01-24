@@ -11,6 +11,7 @@ dn: ou={{ env "NOMAD_META_groups" }},{{ env "NOMAD_META_basedn" }}
 ou: {{ env "NOMAD_META_groups" }}
 objectClass: top
 objectClass: organizationalUnit
+objectClass: groupOfMembers
 description: User groups
 
 # Users

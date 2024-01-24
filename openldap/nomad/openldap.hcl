@@ -60,6 +60,12 @@ variable "schema" {
   type        = map(string)
 }
 
+variable "extra_schemas" {
+  description = "Extra schemas, optional"
+  type        = string
+  default     = "cosine, inetorgperson"
+}
+
 variable "admin_password" {
   description = "LDAP admin password"
   type        = string
@@ -115,7 +121,7 @@ job "openldap" {
     network {
       port "ldap" {
         static = var.port
-        to     = 1389
+        to     = 389
       }
     }
 
@@ -165,7 +171,7 @@ job "openldap" {
         LDAP_PORT_NUMBER       = NOMAD_PORT_ldap
         LDAP_ROOT              = var.basedn
         LDAP_ADD_SCHEMAS       = "yes"
-        LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
+        LDAP_EXTRA_SCHEMAS     = var.extra_schemas
         LDAP_SKIP_DEFAULT_TREE = "yes"
         LDAP_CUSTOM_LDIF_DIR   = local.ldif_path
         LDAP_CUSTOM_SCHEMA_DIR = local.schema_path
@@ -174,9 +180,9 @@ job "openldap" {
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
-        volumes = compact([
-          format("%s:%s/data", var.data, local.data_path),
-        ])
+        //volumes = compact([
+        //  format("%s:%s/data", var.data, local.data_path),
+        //])
         ports = ["ldap"]
       }
 
