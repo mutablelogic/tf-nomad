@@ -16,6 +16,8 @@ resource "nomad_job" "ldap" {
       admin_password     = var.admin_password
       basedn             = var.basedn
       organization       = var.organization
+
+      # LDIF templates which are only applied when the data directory is empty (first run)
       ldif = jsonencode({
         "root" = file("${path.module}/ldif/root.ldif")
       })

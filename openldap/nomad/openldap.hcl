@@ -79,7 +79,7 @@ variable "organization" {
 // LOCALS
 
 locals {
-  data_path   = "/bitnami/openldap/data"
+  data_path   = "/bitnami/openldap"
   ldif_path   = "${NOMAD_ALLOC_DIR}/data/ldif"
   schema_path = "${NOMAD_ALLOC_DIR}/data/schema"
 }
@@ -115,7 +115,7 @@ job "openldap" {
     network {
       port "ldap" {
         static = var.port
-        to     = 389
+        to     = 1389
       }
     }
 
@@ -167,15 +167,15 @@ job "openldap" {
         LDAP_ADD_SCHEMAS       = "yes"
         LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
         LDAP_SKIP_DEFAULT_TREE = "yes"
-        LDAP_CUSTOM_LDIF_DIR   = "" // local.ldif_path
-        LDAP_CUSTOM_SCHEMA_DIR = "" // local.schema_path
+        LDAP_CUSTOM_LDIF_DIR   = local.ldif_path
+        LDAP_CUSTOM_SCHEMA_DIR = local.schema_path
       }
 
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          format("%s:%s", var.data, local.data_path),
+          format("%s:%s/data", var.data, local.data_path),
         ])
         ports = ["ldap"]
       }
