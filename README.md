@@ -20,7 +20,6 @@ provider "nomad" {
 }
 ```
 
-
 ## nginx
 
 Web server and reverse proxy, which can be placed on several nodes
@@ -134,3 +133,4 @@ TODO:
   * [ ] Add TLS support
   * [ ] Data source provisioning
   * [ ] Dashboard provisioning
+ 
