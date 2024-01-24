@@ -2,7 +2,7 @@
 # Root
 dn: {{ env "NOMAD_META_basedn" }}
 objectClass: top
-objectClass: organization
+objectClass: domain
 dc: {{ env "NOMAD_META_organization" }}
 description: Organization
 
