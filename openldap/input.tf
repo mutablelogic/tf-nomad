@@ -24,7 +24,8 @@ variable "docker_tag" {
 
 variable "hosts" {
   type        = list(string)
-  description = "List of hosts to deploy on (required)"
+  description = "List of hosts to deploy on, defaults to one host"
+  default     = []
 }
 
 variable "port" {
@@ -35,8 +36,17 @@ variable "port" {
 
 variable "data" {
   type        = string
-  description = "Directory for data persistence"
-  default     = ""
+  description = "Directory for data persistence, required"
+}
+
+variable "ldif" {
+  type        = string
+  description = "Directory for additional ldif files, optional"
+}
+
+variable "schema" {
+  type        = string
+  description = "Directory for additional schema files, optional"
 }
 
 variable "admin_password" {

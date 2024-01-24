@@ -46,7 +46,17 @@ variable "port" {
 }
 
 variable "data" {
-  description = "Data persistence directory"
+  description = "Data persistence directory, required"
+  type        = string
+}
+
+variable "ldif" {
+  description = "Path to custom LDIF files, optional"
+  type        = string
+}
+
+variable "schema" {
+  description = "Path to custom schema files, optional"
   type        = string
 }
 
@@ -58,6 +68,15 @@ variable "admin_password" {
 variable "basedn" {
   description = "Distinguished name"
   type        = string
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  data_path   = "/bitnami/openldap"
+  ldif_path   = var.ldif == "" ? "" : "/ldap/ldif"
+  schema_path = var.schema == "" ? "" : "/ldap/schema"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -77,12 +96,15 @@ job "openldap" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "openldap" {
-    count = length(var.hosts)
+    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
 
-    constraint {
-      attribute = node.unique.name
-      operator  = "set_contains_any"
-      value     = join(",", var.hosts)
+    dynamic "constraint" {
+      for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
+      content {
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = constraint.value
+      }
     }
 
     network {
@@ -110,7 +132,8 @@ job "openldap" {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         volumes = compact([
-          var.data == "" ? "" : format("%s:/bitnami/openldap",var.data)
+          local.ldif_path == "" ? "" : format("%s:%s", var.ldif, local.ldif_path),
+          local.schema_path == "" ? "" : format("%s:%s", var.schema, local.schema_path)
         ])
         ports = ["ldap"]
       }
@@ -125,6 +148,8 @@ job "openldap" {
         LDAP_ADD_SCHEMAS       = "yes"
         LDAP_EXTRA_SCHEMAS     = "cosine, inetorgperson, nis"
         LDAP_SKIP_DEFAULT_TREE = "yes"
+        LDAP_CUSTOM_LDIF_DIR   = local.ldif_path
+        LDAP_CUSTOM_SCHEMA_DIR = local.schema_path
       }
 
     } // task "daemon"
