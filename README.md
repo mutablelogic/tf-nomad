@@ -20,6 +20,20 @@ provider "nomad" {
 }
 ```
 
+
+## coredns
+
+DNS server which could be used to resolve nomad services into dns records
+
+   * [Documentation](https://coredns.io/)
+   * [Terraform Example](examples/coredns.tf)
+   * [Nomad Job](coredns/nomad/coredns.hcl)
+
+TODO:
+  * [ ] In progress
+  * [ ] Add nomad plugin
+  * [ ] All nomad jobs will need to use the coredns service as a dns_server option
+
 ## nginx
 
 Web server and reverse proxy, which can be placed on several nodes

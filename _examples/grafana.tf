@@ -1,7 +1,7 @@
 
 // Example grafana dashboard example
 module "grafana" {
-  source = "github.com/mutablelogic/tf-nomad/grafana"
+  source = "github.com/mutablelogic/tf-nomad//grafana"
 
   // Required parameters  
   dc             = local.datacenter             // Nomad datacenter for the cluster

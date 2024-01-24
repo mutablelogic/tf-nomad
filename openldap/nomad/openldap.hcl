@@ -46,8 +46,9 @@ variable "port" {
 }
 
 variable "data" {
-  description = "Data persistence directory, required"
+  description = "Data persistence directory"
   type        = string
+  default     = ""
 }
 
 variable "ldif" {
@@ -63,7 +64,7 @@ variable "schema" {
 variable "extra_schemas" {
   description = "Extra schemas, optional"
   type        = string
-  default     = "cosine, inetorgperson"
+  default     = "cosine,inetorgperson"
 }
 
 variable "admin_password" {
@@ -85,7 +86,6 @@ variable "organization" {
 // LOCALS
 
 locals {
-  data_path   = "/bitnami/openldap"
   ldif_path   = "${NOMAD_ALLOC_DIR}/data/ldif"
   schema_path = "${NOMAD_ALLOC_DIR}/data/schema"
 }
@@ -138,6 +138,7 @@ job "openldap" {
 
     task "daemon" {
       driver = "docker"
+      user   = "root"
 
       // Metadata for ldif and schema templates
       meta {
@@ -180,9 +181,9 @@ job "openldap" {
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
-        //volumes = compact([
-        //  format("%s:%s/data", var.data, local.data_path),
-        //])
+        volumes = compact([
+          var.data == "" ? "" : format("%s:/bitnami/openldap/", var.data),
+        ])
         ports = ["ldap"]
       }
 

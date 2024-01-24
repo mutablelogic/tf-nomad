@@ -24,34 +24,12 @@ variable "docker_tag" {
 
 variable "hosts" {
   type        = list(string)
-  description = "List of hosts to deploy on, defaults to one host"
+  description = "List of hosts to deploy on. If empty, one allocation will be created"
   default     = []
 }
 
 variable "port" {
   type        = number
   description = "Port to expose plaintext service"
-  default     = 389
-}
-
-variable "data" {
-  type        = string
-  description = "Directory for data persistence"
-  default = ""
-}
-
-variable "admin_password" {
-  description = "LDAP admin password (required)"
-  type        = string
-  sensitive   = true
-}
-
-variable "basedn" {
-  description = "LDAP distinguished name (required)"
-  type        = string
-}
-
-variable "organization" {
-  description = "Organization name (required)"
-  type        = string
+  default     = 53
 }
