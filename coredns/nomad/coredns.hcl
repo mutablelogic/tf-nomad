@@ -46,8 +46,31 @@ variable "port" {
 }
 
 variable "corefile" {
-  description = "Configuration file for coredns"
+  description = "Configuration file for coredns (required)"
   type        = string
+}
+
+variable "nomad_addr" {
+  description = "Nomad address url for service discovery (required)"
+  type        = string
+}
+
+variable "nomad_token" {
+  description = "Nomad authentication token"
+  type        = string
+  default     = ""
+}
+
+variable "cache_ttl" {
+  description = "Number of seconds to cache service discovery results"
+  type        = number
+  default     = 30
+}
+
+variable "dns_zone" {
+  description = "DNS lookup zone"
+  type        = string
+  default     = "nomad"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,11 +134,18 @@ job "coredns" {
         data        = var.corefile
       }
 
+      env {
+        NOMAD_ADDR  = var.nomad_addr
+        NOMAD_TOKEN = var.nomad_token
+        CACHE_TTL   = var.cache_ttl
+        DNS_ZONE    = var.dns_zone
+      }
+
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
         ports      = ["dns"]
-        args       = ["-conf", local.core_file]
+        args       = ["coredns", "-conf", local.core_file]
       }
 
     } // task "daemon"
