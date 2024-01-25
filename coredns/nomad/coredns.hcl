@@ -40,6 +40,12 @@ variable "service_dns" {
   default     = []
 }
 
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
+}
+
 variable "dns_servers" {
   description = "Task DNS servers"
   type        = list(string)
@@ -102,7 +108,7 @@ locals {
 // JOB
 
 job "coredns" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -115,7 +121,7 @@ job "coredns" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "coredns" {
-    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
       for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]

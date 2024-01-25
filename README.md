@@ -4,15 +4,6 @@ Terraform modules for nomad clusters. In order to use these modules, please use
 the following provider block:
 
 ```hcl
-terraform {
-  required_providers {
-    nomad = {
-      source  = "hashicorp/nomad"
-      version = "~> 2.0.0"
-    }
-  }
-}
-
 provider "nomad" {
   address   = env.NOMAD_ADDR
   region    = env.NOMAD_REGION
