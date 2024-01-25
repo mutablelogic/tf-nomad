@@ -1,5 +1,15 @@
-.:53 {
-    forward . 8.8.8.8 9.9.9.9
+nomad {
+    nomad {
+        address {$NOMAD_ADDR}
+        token {$NOMAD_TOKEN}
+        ttl {$CACHE_TTL}
+    }
+    cache {$CACHE_TTL}
+    errors
     log
+}
+
+. {
+    forward . /etc/resolv.conf
     errors
 }

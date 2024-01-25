@@ -18,8 +18,8 @@ variable "enabled" {
 
 variable "docker_tag" {
   type        = string
-  description = "Version of the docker image to use, defaults to latest"
-  default     = "latest"
+  description = "Version of the docker image to use, defaults to v1.11.1"
+  default     = "v1.11.1"
 }
 
 variable "hosts" {
@@ -32,4 +32,21 @@ variable "port" {
   type        = number
   description = "Port to expose plaintext service"
   default     = 53
+}
+
+variable "nomad_addr" {
+  description = "Nomad address url for service discovery (required)"
+  type        = string
+}
+
+variable "nomad_token" {
+  description = "Nomad authentication token"
+  type        = string
+  default     = ""
+}
+
+variable "cache_ttl" {
+  description = "Number of seconds to cache service discovery results"
+  type        = number
+  default     = 30
 }

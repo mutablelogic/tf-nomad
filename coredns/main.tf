@@ -13,6 +13,9 @@ resource "nomad_job" "coredns" {
       hosts              = jsonencode(var.hosts)
       port               = var.port
       corefile           = file("${path.module}/config/Corefile")
+      nomad_addr         = var.nomad_addr
+      nomad_token        = var.nomad_token
+      cache_ttl          = var.cache_ttl
     }
   }
 }
