@@ -28,6 +28,18 @@ variable "service_provider" {
   default     = "nomad"
 }
 
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "openldap-ldap"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -126,10 +138,10 @@ job "openldap" {
     }
 
     service {
-      tags     = ["ldap"]
-      name     = "ldap"
-      port     = "ldap"
+      tags     = ["openldap", "ldap"]
+      name     = var.service_name
       provider = var.service_provider
+      port     = "ldap"
     }
 
     ephemeral_disk {
@@ -184,7 +196,8 @@ job "openldap" {
         volumes = compact([
           var.data == "" ? "" : format("%s:/bitnami/openldap/", var.data),
         ])
-        ports = ["ldap"]
+        ports       = ["ldap"]
+        dns_servers = var.service_dns
       }
 
     } // task "daemon"

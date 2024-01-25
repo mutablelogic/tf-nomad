@@ -1,7 +1,7 @@
 
 // Example Cluster filesystem using seaweedfs, with one master, two volumes and three filers
 module "clusterfs" {
-  source      = "github.com/mutablelogic/tf-nomad/seaweedfs"
+  source      = "github.com/mutablelogic/tf-nomad//seaweedfs"
   enabled     = true         // If false, no-op
   dc          = "datacenter" // Nomad datacenter for the cluster
   namespace   = "clusterfs"  // Nomad namespace for the cluster

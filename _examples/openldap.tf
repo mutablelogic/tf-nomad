@@ -1,7 +1,7 @@
 
 // Example LDAP server, using the bitnami/openldap docker image
 module "openldap" {
-  source = "github.com/mutablelogic/tf-nomad/openldap"
+  source = "github.com/mutablelogic/tf-nomad//openldap"
 
   // Required parameters
   dc             = "datacenter"              // Nomad datacenter for the cluster

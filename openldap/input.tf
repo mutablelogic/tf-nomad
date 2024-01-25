@@ -16,6 +16,24 @@ variable "enabled" {
   default     = true
 }
 
+variable "service_provider" {
+  description = "Service provider, either consul or nomad"
+  type        = string
+  default     = "nomad"
+}
+
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "openldap-ldap"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
 variable "docker_tag" {
   type        = string
   description = "Version of the docker image to use, defaults to latest"

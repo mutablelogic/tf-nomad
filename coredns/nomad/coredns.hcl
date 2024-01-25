@@ -28,6 +28,24 @@ variable "service_provider" {
   default     = "nomad"
 }
 
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "coredns-dns"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "dns_servers" {
+  description = "Task DNS servers"
+  type        = list(string)
+  default     = []
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -117,7 +135,7 @@ job "coredns" {
 
     service {
       tags     = ["dns"]
-      name     = "coredns-dns"
+      name     = var.service_name
       port     = "dns"
       provider = var.service_provider
     }
@@ -142,10 +160,11 @@ job "coredns" {
       }
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        ports      = ["dns"]
-        args       = ["coredns", "-conf", local.core_file]
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        ports       = ["dns"]
+        args        = ["coredns", "-conf", local.core_file]
+        dns_servers = var.service_dns
       }
 
     } // task "daemon"

@@ -22,6 +22,24 @@ variable "docker_tag" {
   default     = "v1.11.1"
 }
 
+variable "service_provider" {
+  description = "Service provider, either consul or nomad"
+  type        = string
+  default     = "nomad"
+}
+
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "coredns-dns"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
 variable "hosts" {
   type        = list(string)
   description = "List of hosts to deploy on. If empty, one allocation will be created"
