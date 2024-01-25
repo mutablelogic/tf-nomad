@@ -16,6 +16,7 @@ resource "nomad_job" "coredns" {
       nomad_addr         = var.nomad_addr
       nomad_token        = var.nomad_token
       cache_ttl          = var.cache_ttl
+      dns_zone           = var.dns_zone
     }
   }
 }

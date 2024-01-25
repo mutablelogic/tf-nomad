@@ -13,4 +13,5 @@ module "coredns" {
   hosts     = ["cm3"] // Host constraint for the job
   port      = 53      // Port to expose for plaintext connections
   cache_ttl = 30      // Cache TTL in seconds
+  dns_zone  = "nomad" // DNS zone to serve
 }

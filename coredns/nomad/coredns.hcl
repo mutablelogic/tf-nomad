@@ -67,6 +67,12 @@ variable "cache_ttl" {
   default     = 30
 }
 
+variable "dns_zone" {
+  description = "DNS lookup zone"
+  type        = string
+  default     = "nomad"
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
@@ -132,6 +138,7 @@ job "coredns" {
         NOMAD_ADDR  = var.nomad_addr
         NOMAD_TOKEN = var.nomad_token
         CACHE_TTL   = var.cache_ttl
+        DNS_ZONE    = var.dns_zone
       }
 
       config {

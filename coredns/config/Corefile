@@ -1,10 +1,10 @@
-nomad {
+{{ env "DNS_ZONE" }} {
     nomad {
-        address {$NOMAD_ADDR}
-        token {$NOMAD_TOKEN}
-        ttl {$CACHE_TTL}
+        address {{ env "NOMAD_ADDR" }}
+        token {{ env "NOMAD_TOKEN" }}
+        ttl {{ env "CACHE_TTL" }}
     }
-    cache {$CACHE_TTL}
+    cache {{ env "CACHE_TTL" }}
     errors
     log
 }

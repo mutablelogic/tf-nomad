@@ -30,7 +30,7 @@ variable "hosts" {
 
 variable "port" {
   type        = number
-  description = "Port to expose plaintext service"
+  description = "Port to expose DNS service"
   default     = 53
 }
 
@@ -49,4 +49,10 @@ variable "cache_ttl" {
   description = "Number of seconds to cache service discovery results"
   type        = number
   default     = 30
+}
+
+variable "dns_zone" {
+  type        = string
+  description = "DNS lookup zone (service.namespace.zone.)"
+  default     = "nomad"
 }

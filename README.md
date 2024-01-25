@@ -20,7 +20,6 @@ provider "nomad" {
 }
 ```
 
-
 ## coredns
 
 DNS server which could be used to resolve nomad services into dns records
@@ -30,9 +29,43 @@ DNS server which could be used to resolve nomad services into dns records
    * [Nomad Job](coredns/nomad/coredns.hcl)
 
 TODO:
-  * [ ] In progress
-  * [ ] Add nomad plugin
   * [ ] All nomad jobs will need to use the coredns service as a dns_server option
+
+## grafana
+
+grafana is a database server
+
+   * [Documentation](https://grafana.com/docs/grafana/latest/)
+   * [Terraform Example](examples/grafana.tf)
+   * [Nomad Job](grafana/nomad/grafana.hcl)
+
+TODO:
+  * [ ] LDAP integration
+  * [ ] Add TLS support
+  * [ ] Data source provisioning
+  * [ ] Dashboard provisioning
+
+## InfluxDB
+
+Time-series database, which can be placed on several nodes
+
+   * [Documentation](https://docs.influxdata.com/influxdb/v2/)
+   * [Terraform Example](examples/influxdb.tf)
+   * [Nomad Job](influxdb/nomad/influxdb.hcl)
+
+TODO:
+  * [ ] Add TLS support
+
+## mosquitto
+
+MQTT broker, which can be placed on several nodes
+
+   * [Documentation](https://mosquitto.org/)
+   * [Terraform Example](examples/mosquitto.tf)
+   * [Nomad Job](mosquitto/nomad/mosquitto.hcl)
+
+TODO:
+  * [ ] Add TLS support
 
 ## nginx
 
@@ -47,6 +80,31 @@ TODO:
   * [ ] Add TLS certificate support
   * [ ] Not sure how we can integrate with nomad services
 
+## OpenLDAP
+
+OpenLDAP server, which can be placed on several nodes
+
+   * [Documentation](https://www.openldap.org/)
+   * [Terraform Example](examples/openldap.tf)
+   * [Nomad Job](openldap/nomad/openldap.hcl)
+
+TODO:
+  * [ ] In progress
+  * [ ] Add TLS support
+  * [ ] Add replication support 
+  * [ ] Add custom schema support
+
+## PostgreSQL
+
+PostgreSQL is a database server
+
+   * [Documentation](https://www.postgresql.org/)
+   * [Terraform Example](examples/postgresql.tf)
+   * [Nomad Job](postgresql/nomad/postgresql.hcl)
+
+TODO:
+  * [ ] LDAP integration
+
 ## seaweedfs
 
 Cluster filesystem, which can be spread across multiple nodes.
@@ -59,40 +117,17 @@ TODO:
   * [ ] In progress
   * [ ] A lot of testing is needed
 
-## mosquitto
+## semaphore
 
-MQTT broker, which can be placed on several nodes
+Semaphore is a Ansible front-end
 
-   * [Documentation](https://mosquitto.org/)
-   * [Terraform Example](examples/mosquitto.tf)
-   * [Nomad Job](mosquitto/nomad/mosquitto.hcl)
-
-TODO:
-  * [ ] Add TLS support
-
-## OpenLDAP
-
-OpenLDAP server, which can be placed on several nodes
-
-   * [Documentation](https://www.openldap.org/)
-   * [Terraform Example](examples/openldap.tf)
-   * [Nomad Job](openldap/nomad/openldap.hcl)
+   * [Documentation](https://www.semui.co/)
+   * [Terraform Example](examples/semaphore.tf)
+   * [Nomad Job](semaphore/nomad/semaphore.hcl)
 
 TODO:
-  * [ ] Add TLS support
-  * [ ] Add replication support 
-  * [ ] Add custom schema support
-
-## InfluxDB
-
-Time-series database, which can be placed on several nodes
-
-   * [Documentation](https://docs.influxdata.com/influxdb/v2/)
-   * [Terraform Example](examples/influxdb.tf)
-   * [Nomad Job](influxdb/nomad/influxdb.hcl)
-
-TODO:
-  * [ ] Add TLS support
+  * [ ] In progress
+  * [ ] LDAP integration
 
 ## telegraf
 
@@ -109,42 +144,3 @@ example above for a demonstration of this.
 
 TODO:
   * [ ] Add processors support
-
-## semaphore
-
-Semaphore is a Ansible front-end
-
-   * [Documentation](https://www.semui.co/)
-   * [Terraform Example](examples/semaphore.tf)
-   * [Nomad Job](semaphore/nomad/semaphore.hcl)
-
-TODO:
-  * [ ] In progress
-  * [ ] LDAP integration
-
-## PostgreSQL
-
-PostgreSQL is a database server
-
-   * [Documentation](https://www.postgresql.org/)
-   * [Terraform Example](examples/postgresql.tf)
-   * [Nomad Job](postgresql/nomad/postgresql.hcl)
-
-TODO:
-  * [ ] LDAP integration
-
-
-## grafana
-
-grafana is a database server
-
-   * [Documentation](https://grafana.com/docs/grafana/latest/)
-   * [Terraform Example](examples/grafana.tf)
-   * [Nomad Job](grafana/nomad/grafana.hcl)
-
-TODO:
-  * [ ] LDAP integration
-  * [ ] Add TLS support
-  * [ ] Data source provisioning
-  * [ ] Dashboard provisioning
- 
