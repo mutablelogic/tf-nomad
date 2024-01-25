@@ -1,7 +1,7 @@
 
 // Example InfluxDB time-series database
 module "influxdb" {
-  source = "github.com/mutablelogic/tf-nomad/influxdb"
+  source = "github.com/mutablelogic/tf-nomad//influxdb"
 
   // Required parameters
   dc             = "datacenter"                  // Nomad datacenter for the cluster

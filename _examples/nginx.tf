@@ -1,7 +1,7 @@
 
 // Example nginx reverse proxy module
 module "nginx" {
-  source = "github.com/mutablelogic/tf-nomad/nginx"
+  source = "github.com/mutablelogic/tf-nomad//nginx"
 
   // Required parameters
   dc = "datacenter" // Nomad datacenter for the cluster

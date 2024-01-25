@@ -1,6 +1,6 @@
 
 module "postgresql" {
-  source = "github.com/mutablelogic/tf-nomad/postgresql"
+  source = "github.com/mutablelogic/tf-nomad//postgresql"
 
   // Required parameters
   dc            = local.datacenter               // Nomad datacenter for the cluster

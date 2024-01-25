@@ -1,7 +1,7 @@
 
 // Example MQTT broker, using the eclipse-mosquitto docker image
 module "mqtt" {
-  source = "github.com/mutablelogic/tf-nomad/mosquitto"
+  source = "github.com/mutablelogic/tf-nomad//mosquitto"
 
   // Required parameters
   dc    = "datacenter"           // Nomad datacenter for the cluster

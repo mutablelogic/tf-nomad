@@ -1,7 +1,7 @@
 
 // Example telegraf time-series metrics collector
 module "telegraf" {
-  source = "github.com/mutablelogic/tf-nomad/telegraf"
+  source = "github.com/mutablelogic/tf-nomad//telegraf"
 
   // Required parameters
   dc        = local.datacenter // Nomad datacenter for the cluster
