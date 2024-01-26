@@ -47,6 +47,18 @@ Time-series database, which can be placed on several nodes
 TODO:
   * [ ] Add TLS support
 
+
+## mongodb
+
+Document database, which can be replicated on several nodes
+
+   * [Documentation](https://www.mongodb.com/docs/manual/)
+   * [Terraform Example](_examples/mongodb.tf)
+   * [Nomad Job](mongodb/nomad/mongodb.hcl)
+
+TODO:
+  * [ ] Add TLS support
+
 ## mosquitto
 
 MQTT broker, which can be placed on several nodes
