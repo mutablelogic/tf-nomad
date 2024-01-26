@@ -11,7 +11,7 @@ module "mongodb" {
   // Optional parameters
   enabled         = true               // If false, no-op
   namespace       = "default"          // Nomad namespace for the cluster
-  docker_tag      = "latest"           // Pull the latest version of the docker image every job restart
+  docker_tag      = "4.4.13"           // Pull version 4.4.13 of the docker image
   port            = 27017              // Port to expose
   data            = "/var/lib/mongodb" // Data persistence directory
   replicaset_name = "rs0"              // Replica set name
