@@ -8,7 +8,7 @@ resource "nomad_job" "openldap" {
     vars = {
       dc                 = jsonencode([var.dc])
       namespace          = var.namespace
-      hosts              = jsonencode(var.hosts)      
+      hosts              = jsonencode(var.hosts)
       docker_image       = local.docker_image
       docker_always_pull = jsonencode(local.docker_always_pull)
       service_provider   = var.service_provider
@@ -16,18 +16,19 @@ resource "nomad_job" "openldap" {
       service_dns        = jsonencode(var.service_dns)
       service_type       = var.service_type
 
-      port               = var.port
-      data               = var.data
-      admin_password     = var.admin_password
-      basedn             = var.basedn
-      organization       = var.organization
+      port           = var.port
+      data           = var.data
+      admin_password = var.admin_password
+      basedn         = var.basedn
+      organization   = var.organization
 
       # LDIF templates which are only applied when the data directory is empty (first run)
       ldif = jsonencode({
         "root" = file("${path.module}/ldif/root.ldif")
       })
       schema = jsonencode({
-        "rfc2307bis" = file("${path.module}/schema/rfc2307bis.ldif")
+        "rfc2307bis" = file("${path.module}/schema/rfc2307bis.ldif"),
+        "memberOf"   = file("${path.module}/schema/memberOf.ldif"),
       })
     }
   }
