@@ -191,7 +191,7 @@ job "openldap" {
         LDAP_EXTRA_SCHEMAS      = var.extra_schemas
         LDAP_SKIP_DEFAULT_TREE  = "yes"
         LDAP_CUSTOM_LDIF_DIR    = local.ldif_path
-        LDAP_CUSTOM_SCHEMA_DIR  = local.schema_path
+        //LDAP_CUSTOM_SCHEMA_DIR  = local.schema_path
         LDAP_CONFIGURE_PPOLICY  = "yes"
         LDAP_ALLOW_ANON_BINDING = "no"
         BITNAMI_DEBUG           = "true"

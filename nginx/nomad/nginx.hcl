@@ -1,23 +1,23 @@
 
 // nginx web server
-// Docker Image: grafana/grafana
+// Docker Image: nginx
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
 
 variable "dc" {
-  description = "Data centers that the job is eligible to run in"
+  description = "data centers that the job is eligible to run in"
   type        = list(string)
 }
 
 variable "namespace" {
-  description = "Namespace that the job runs in"
+  description = "namespace that the job runs in"
   type        = string
   default     = "default"
 }
 
 variable "hosts" {
-  description = "Host constraint for the job, if empty exactly one allocation will be created"
+  description = "List of hosts to deploy on. If empty, one allocation will be created"
   type        = list(string)
   default     = []
 }
@@ -28,10 +28,27 @@ variable "service_provider" {
   default     = "nomad"
 }
 
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "grafana-http"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
-  default     = "nginx"
 }
 
 variable "docker_always_pull" {
@@ -39,6 +56,8 @@ variable "docker_always_pull" {
   type        = bool
   default     = false
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 variable "ports" {
   description = "Ports to expose"
@@ -67,7 +86,7 @@ variable "servers" {
 // JOB
 
 job "nginx" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -80,7 +99,7 @@ job "nginx" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "nginx" {
-    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
       for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
@@ -144,14 +163,13 @@ job "nginx" {
       }
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        ports      = keys(var.ports)
-        args       = ["nginx", "-c", "${NOMAD_TASK_DIR}/config/nginx.conf", "-g", "daemon off;"]
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        ports       = keys(var.ports)
+        dns_servers = var.service_dns
+        args        = ["nginx", "-c", "${NOMAD_TASK_DIR}/config/nginx.conf", "-g", "daemon off;"]
       }
 
     } // task "server"
-
   } // group "nginx"
-
 } // job "nginx"
