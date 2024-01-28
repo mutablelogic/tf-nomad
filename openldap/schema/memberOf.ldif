@@ -17,7 +17,6 @@ olcMemberOfGroupOC: groupOfNames
 olcMemberOfMemberAD: member
 olcMemberOfMemberOfAD: memberOf
 
-
 dn: olcOverlay={1}refint,olcDatabase={2}mdb,cn=config
 objectClass: olcConfig
 objectClass: olcOverlayConfig

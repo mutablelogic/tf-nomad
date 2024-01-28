@@ -84,7 +84,7 @@ variable "schema" {
 variable "extra_schemas" {
   description = "Extra schemas, optional"
   type        = string
-  default     = "cosine, inetorgperson"
+  default     = "cosine,inetorgperson"
 }
 
 variable "admin_password" {
@@ -106,8 +106,8 @@ variable "organization" {
 // LOCALS
 
 locals {
-  ldif_path   = "${NOMAD_ALLOC_DIR}/data/ldif"
-  schema_path = "${NOMAD_ALLOC_DIR}/data/schema"
+  ldif_path   = format("%s/data/ldif",NOMAD_ALLOC_DIR)
+  schema_path   = format("%s/data/schema",NOMAD_ALLOC_DIR)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,10 +152,6 @@ job "openldap" {
       provider = var.service_provider
     }
 
-    ephemeral_disk {
-      migrate = true
-    }
-
     task "daemon" {
       driver = "docker"
       user   = "root"
@@ -191,14 +187,14 @@ job "openldap" {
         LDAP_ADMIN_PASSWORD     = var.admin_password
         LDAP_PORT_NUMBER        = NOMAD_PORT_ldap
         LDAP_ROOT               = var.basedn
-        LDAP_LOGLEVEL           = "64"
-        LDAP_ADD_SCHEMAS        = "yes"
+        LDAP_ADD_SCHEMAS        = var.extra_schemas == "" ? "no" : "yes"
         LDAP_EXTRA_SCHEMAS      = var.extra_schemas
         LDAP_SKIP_DEFAULT_TREE  = "yes"
         LDAP_CUSTOM_LDIF_DIR    = local.ldif_path
         LDAP_CUSTOM_SCHEMA_DIR  = local.schema_path
         LDAP_CONFIGURE_PPOLICY  = "yes"
         LDAP_ALLOW_ANON_BINDING = "no"
+        BITNAMI_DEBUG           = "true"
       }
 
       config {
