@@ -6,7 +6,7 @@
 // VARIABLES
 
 variable "dc" {
-  description = "data centers that the job runs in"
+  description = "data centers that the job is eligible to run in"
   type        = list(string)
 }
 
@@ -17,7 +17,7 @@ variable "namespace" {
 }
 
 variable "hosts" {
-  description = "host constraint for the job"
+  description = "host constraint for the job, defaults to one host"
   type        = list(string)
   default     = []
 }
@@ -31,13 +31,19 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "openldap-ldap"
+  default     = "coredns-dns"
 }
 
 variable "service_dns" {
   description = "Service discovery DNS"
   type        = list(string)
   default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
 }
 
 variable "docker_image" {
@@ -50,6 +56,8 @@ variable "docker_always_pull" {
   type        = bool
   default     = false
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
   description = "Port for plaintext connections"
@@ -106,7 +114,7 @@ locals {
 // JOB
 
 job "openldap" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -119,7 +127,7 @@ job "openldap" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "openldap" {
-    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
       for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
@@ -140,8 +148,8 @@ job "openldap" {
     service {
       tags     = ["openldap", "ldap"]
       name     = var.service_name
-      provider = var.service_provider
       port     = "ldap"
+      provider = var.service_provider
     }
 
     ephemeral_disk {
@@ -193,11 +201,11 @@ job "openldap" {
       config {
         image      = var.docker_image
         force_pull = var.docker_always_pull
+        ports       = ["ldap"]
+        dns_servers = var.service_dns
         volumes = compact([
           var.data == "" ? "" : format("%s:/bitnami/openldap/", var.data),
         ])
-        ports       = ["ldap"]
-        dns_servers = var.service_dns
       }
 
     } // task "daemon"

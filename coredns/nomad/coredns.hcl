@@ -1,6 +1,6 @@
 
 // coredns for service discovery
-// Docker Image: https://hub.docker.com/r/coredns/coredns/
+// Docker Image: ghcr.io/mutablelogic/coredns-nomad
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
@@ -46,12 +46,6 @@ variable "service_type" {
   default     = "service"
 }
 
-variable "dns_servers" {
-  description = "Task DNS servers"
-  type        = list(string)
-  default     = []
-}
-
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -62,6 +56,8 @@ variable "docker_always_pull" {
   type        = bool
   default     = false
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
   description = "Port for plaintext connections"
@@ -140,7 +136,7 @@ job "coredns" {
     }
 
     service {
-      tags     = ["dns"]
+      tags     = ["coredns", "dns"]
       name     = var.service_name
       port     = "dns"
       provider = var.service_provider
@@ -169,8 +165,8 @@ job "coredns" {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
         ports       = ["dns"]
-        args        = ["coredns", "-conf", local.core_file]
         dns_servers = var.service_dns
+        args        = ["coredns", "-conf", local.core_file]
       }
 
     } // task "daemon"

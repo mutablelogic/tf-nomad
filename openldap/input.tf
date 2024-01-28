@@ -16,6 +16,12 @@ variable "enabled" {
   default     = true
 }
 
+variable "docker_tag" {
+  type        = string
+  description = "Version of the docker image to use, defaults to latest"
+  default     = "latest"
+}
+
 variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
@@ -34,15 +40,15 @@ variable "service_dns" {
   default     = []
 }
 
-variable "docker_tag" {
+variable "service_type" {
+  description = "Run as a service or system"
   type        = string
-  description = "Version of the docker image to use, defaults to latest"
-  default     = "latest"
+  default     = "service"
 }
 
 variable "hosts" {
   type        = list(string)
-  description = "List of hosts to deploy on, defaults to one host"
+  description = "List of hosts to deploy on. If empty, one allocation will be created"
   default     = []
 }
 

@@ -6,7 +6,7 @@
 // VARIABLES
 
 variable "dc" {
-  description = "data centers that the job runs in"
+  description = "data centers that the job is eligible to run in"
   type        = list(string)
 }
 
@@ -17,7 +17,7 @@ variable "namespace" {
 }
 
 variable "hosts" {
-  description = "host constraint for the job"
+  description = "host constraint for the job, defaults to one host"
   type        = list(string)
   default     = []
 }
@@ -26,6 +26,24 @@ variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
   default     = "nomad"
+}
+
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "coredns-dns"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
 }
 
 variable "docker_image" {
@@ -38,6 +56,8 @@ variable "docker_always_pull" {
   type        = bool
   default     = false
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
   description = "port"
@@ -62,7 +82,7 @@ locals {
 // JOB
 
 job "mosquitto" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -75,12 +95,15 @@ job "mosquitto" {
   ///////////////////////////////////////////////////////////////////////////////
 
   group "mosquitto" {
-    count = length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
-    constraint {
-      attribute = node.unique.name
-      operator  = "set_contains_any"
-      value     = join(",", var.hosts)
+    dynamic "constraint" {
+      for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
+      content {
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = constraint.value
+      }
     }
 
     network {
@@ -91,7 +114,7 @@ job "mosquitto" {
     }
 
     service {
-      tags     = ["mqtt"]
+      tags     = ["mosquitto", "mqtt"]
       name     = "mosquitto-mqtt"
       port     = "mqtt"
       provider = var.service_provider
@@ -120,14 +143,17 @@ job "mosquitto" {
       }
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        ports       = ["mqtt"]
+        dns_servers = var.service_dns
         volumes = compact([
-          var.data == "" ? "" : format("%s:/mosquitto/data",var.data),
+          var.data == "" ? "" : format("%s:/mosquitto/data", var.data),
           "local/config:/mosquitto/config:ro"
         ])
-        ports = ["mqtt"]
+
       }
-    }
-  }
-}
+    } // task "daemon"
+  } // group "mosquitto"
+} // job "mosquitto"
+
