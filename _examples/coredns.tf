@@ -9,9 +9,11 @@ module "coredns" {
   nomad_token = local.nomad_token // Token for the Nomad server
 
   // Optional parameters
-  enabled   = true
-  hosts     = ["cm3"] // Host constraint for the job
-  port      = 53      // Port to expose for plaintext connections
-  cache_ttl = 30      // Cache TTL in seconds
-  dns_zone  = "nomad" // DNS zone to serve
+  service_type = "system"              // System or service
+  service_dns  = [ "dns1", "dns2" ]    // Upstream DNS
+  enabled      = true
+  hosts        = ["server1"]           // Host constraint for the job
+  port         = 53                    // Port to expose for plaintext connections
+  cache_ttl    = 30                    // Cache TTL in seconds
+  dns_zone     = "nomad"               // DNS zone to serve
 }
