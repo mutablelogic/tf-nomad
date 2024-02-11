@@ -18,8 +18,8 @@ variable "enabled" {
 
 variable "docker_tag" {
   type        = string
-  description = "Version of the docker image to use, defaults to v1.11.1"
-  default     = "v1.11.1"
+  description = "Version of the docker image to use, defaults to latest"
+  default     = "latest"
 }
 
 variable "service_provider" {
@@ -54,30 +54,26 @@ variable "hosts" {
 
 variable "port" {
   type        = number
-  description = "Port to expose DNS service"
-  default     = 53
+  description = "Port to expose plaintext service"
+  default     = 27017
 }
 
-variable "nomad_addr" {
-  description = "Nomad address url for service discovery (required)"
+variable "data" {
   type        = string
-}
-
-variable "nomad_token" {
-  description = "Nomad authentication token"
-  type        = string
+  description = "Directory for data persistence"
   default     = ""
+}
+
+variable "admin_password" {
+  description = "password for 'admin' user (required)"
+  type        = string
   sensitive   = true
 }
 
-variable "cache_ttl" {
-  description = "Number of seconds to cache service discovery results"
-  type        = number
-  default     = 30
+variable "replicaset_name" {
+  description = "replica set name"
+  type        = string
+  default    = "rs0"
 }
 
-variable "dns_zone" {
-  type        = string
-  description = "DNS lookup zone (service.namespace.zone.)"
-  default     = "nomad"
-}
+

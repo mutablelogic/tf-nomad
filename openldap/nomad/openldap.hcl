@@ -1,12 +1,12 @@
 
 // OpenLDAP server
-// Docker Image: https://bitnami.com/stack/openldap
+// Docker Image: https://github.com/osixia/docker-openldap
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
 
 variable "dc" {
-  description = "data centers that the job runs in"
+  description = "data centers that the job is eligible to run in"
   type        = list(string)
 }
 
@@ -17,7 +17,7 @@ variable "namespace" {
 }
 
 variable "hosts" {
-  description = "host constraint for the job"
+  description = "host constraint for the job, defaults to one host"
   type        = list(string)
   default     = []
 }
@@ -40,6 +40,12 @@ variable "service_dns" {
   default     = []
 }
 
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -51,16 +57,49 @@ variable "docker_always_pull" {
   default     = false
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 variable "port" {
   description = "Port for plaintext connections"
   type        = number
   default     = 389
 }
 
+variable "tls_port" {
+  description = "Port for TLS connections"
+  type        = number
+  default     = 636
+}
+
 variable "data" {
   description = "Data persistence directory"
   type        = string
   default     = ""
+}
+
+variable "admin_password" {
+  description = "LDAP admin password"
+  type        = string
+}
+
+variable "config_password" {
+  description = "LDAP config password"
+  type        = string
+}
+
+variable "replication_hosts" {
+  description = "LDAP urls for replication"
+  type        = list(string)
+}
+
+variable "organization" {
+  description = "Organization name"
+  type        = string
+}
+
+variable "domain" {
+  description = "Organization domain"
+  type        = string
 }
 
 variable "ldif" {
@@ -73,40 +112,25 @@ variable "schema" {
   type        = map(string)
 }
 
-variable "extra_schemas" {
-  description = "Extra schemas, optional"
-  type        = string
-  default     = "cosine,inetorgperson"
-}
-
-variable "admin_password" {
-  description = "LDAP admin password"
-  type        = string
-}
-
-variable "basedn" {
-  description = "Distinguished name"
-  type        = string
-}
-
-variable "organization" {
-  description = "Organization name"
-  type        = string
+variable "debug" {
+  description = "Debug output"
+  type        = bool
+  default     = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
 locals {
-  ldif_path   = "${NOMAD_ALLOC_DIR}/data/ldif"
-  schema_path = "${NOMAD_ALLOC_DIR}/data/schema"
+  ldif_path   = format("%s/data/ldif", NOMAD_ALLOC_DIR)
+  schema_path = format("%s/data/schema", NOMAD_ALLOC_DIR)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
 job "openldap" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -119,7 +143,7 @@ job "openldap" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "openldap" {
-    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
       for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
@@ -135,27 +159,27 @@ job "openldap" {
         static = var.port
         to     = 389
       }
+      port "ldaps" {
+        static = var.tls_port
+        to     = 636
+      }
     }
 
     service {
       tags     = ["openldap", "ldap"]
       name     = var.service_name
-      provider = var.service_provider
       port     = "ldap"
-    }
-
-    ephemeral_disk {
-      migrate = true
+      provider = var.service_provider
     }
 
     task "daemon" {
       driver = "docker"
-      user   = "root"
 
       // Metadata for ldif and schema templates
       meta {
-        basedn       = var.basedn
         organization = var.organization
+        domain       = "{{ LDAP_DOMAIN }}"
+        basedn       = "{{ LDAP_BASE_DN }}"
         users        = "users"
         groups       = "groups"
       }
@@ -179,25 +203,28 @@ job "openldap" {
       }
 
       env {
-        LDAP_ADMIN_USERNAME    = "admin"
-        LDAP_ADMIN_PASSWORD    = var.admin_password
-        LDAP_PORT_NUMBER       = NOMAD_PORT_ldap
-        LDAP_ROOT              = var.basedn
-        LDAP_ADD_SCHEMAS       = "yes"
-        LDAP_EXTRA_SCHEMAS     = var.extra_schemas
-        LDAP_SKIP_DEFAULT_TREE = "yes"
-        LDAP_CUSTOM_LDIF_DIR   = local.ldif_path
-        LDAP_CUSTOM_SCHEMA_DIR = local.schema_path
+        LDAP_DOMAIN                    = var.domain
+        LDAP_ORGANISATION              = var.organization
+        LDAP_ADMIN_PASSWORD            = var.admin_password
+        LDAP_CONFIG_PASSWORD           = var.config_password
+        LDAP_RFC2307BIS_SCHEMA         = "true"
+        LDAP_REMOVE_CONFIG_AFTER_SETUP = "false"
+        LDAP_SEED_INTERNAL_LDIF_PATH   = length(var.ldif) == 0 ? "" : local.ldif_path
+        LDAP_SEED_INTERNAL_SCHEMA_PATH = length(var.schema) == 0 ? "" : local.schema_path
+        LDAP_REPLICATION_HOSTS         = length(var.replication_hosts) == 0 ? "" : format("#PYTHON2BASH:%s", jsonencode(var.replication_hosts))
+        LDAP_TLS                       = "false"
       }
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        volumes = compact([
-          var.data == "" ? "" : format("%s:/bitnami/openldap/", var.data),
-        ])
-        ports       = ["ldap"]
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        ports       = ["ldap", "ldaps"]
         dns_servers = var.service_dns
+        args        = ["--copy-service", "--loglevel", var.debug ? "debug" : "info"]
+        volumes = compact([
+          var.data == "" ? "" : format("%s/data:/var/lib/ldap", var.data),
+          var.data == "" ? "" : format("%s/slapd.d:/etc/ldap/slapd.d", var.data),
+        ])
       }
 
     } // task "daemon"

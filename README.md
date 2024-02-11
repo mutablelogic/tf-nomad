@@ -4,15 +4,6 @@ Terraform modules for nomad clusters. In order to use these modules, please use
 the following provider block:
 
 ```hcl
-terraform {
-  required_providers {
-    nomad = {
-      source  = "hashicorp/nomad"
-      version = "~> 2.0.0"
-    }
-  }
-}
-
 provider "nomad" {
   address   = env.NOMAD_ADDR
   region    = env.NOMAD_REGION
@@ -52,6 +43,18 @@ Time-series database, which can be placed on several nodes
    * [Documentation](https://docs.influxdata.com/influxdb/v2/)
    * [Terraform Example](_examples/influxdb.tf)
    * [Nomad Job](influxdb/nomad/influxdb.hcl)
+
+TODO:
+  * [ ] Add TLS support
+
+
+## mongodb
+
+Document database, which can be replicated on several nodes
+
+   * [Documentation](https://www.mongodb.com/docs/manual/)
+   * [Terraform Example](_examples/mongodb.tf)
+   * [Nomad Job](mongodb/nomad/mongodb.hcl)
 
 TODO:
   * [ ] Add TLS support

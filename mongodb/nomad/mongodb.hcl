@@ -1,6 +1,6 @@
 
-// coredns for service discovery
-// Docker Image: ghcr.io/mutablelogic/coredns-nomad
+// mongodb document database
+// Docker Image: https://hub.docker.com/_/mongo
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "coredns-dns"
+  default     = "mongodb"
 }
 
 variable "service_dns" {
@@ -46,6 +46,12 @@ variable "service_type" {
   default     = "service"
 }
 
+variable "dns_servers" {
+  description = "Task DNS servers"
+  type        = list(string)
+  default     = []
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -57,53 +63,34 @@ variable "docker_always_pull" {
   default     = false
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
 variable "port" {
   description = "Port for plaintext connections"
   type        = number
-  default     = 53
+  default     = 27017
 }
 
-variable "corefile" {
-  description = "Configuration file for coredns (required)"
+variable "data" {
   type        = string
-}
-
-variable "nomad_addr" {
-  description = "Nomad address url for service discovery (required)"
-  type        = string
-}
-
-variable "nomad_token" {
-  description = "Nomad authentication token"
-  type        = string
+  description = "Directory for data persistence"
   default     = ""
 }
 
-variable "cache_ttl" {
-  description = "Number of seconds to cache service discovery results"
-  type        = number
-  default     = 30
-}
-
-variable "dns_zone" {
-  description = "DNS lookup zone"
+variable "admin_password" {
+  description = "password for 'admin' user (required)"
   type        = string
-  default     = "nomad"
+  sensitive   = true
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// LOCALS
-
-locals {
-  core_file = format("%s/data/Corefile", NOMAD_ALLOC_DIR)
+variable "replicaset_name" {
+  description = "replica set name"
+  type        = string
+  default    = "rs0"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
-job "coredns" {
+job "mongodb" {
   type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
@@ -116,7 +103,7 @@ job "coredns" {
 
   /////////////////////////////////////////////////////////////////////////////////
 
-  group "coredns" {
+  group "mongodb" {
     count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
@@ -129,16 +116,16 @@ job "coredns" {
     }
 
     network {
-      port "dns" {
+      port "mongodb" {
         static = var.port
-        to     = 53
+        to     = 27017
       }
     }
 
     service {
-      tags     = ["coredns", "dns"]
+      tags     = ["mongodb"]
       name     = var.service_name
-      port     = "dns"
+      port     = "mongodb"
       provider = var.service_provider
     }
 
@@ -146,29 +133,24 @@ job "coredns" {
       migrate = true
     }
 
-    task "daemon" {
+    task "server" {
       driver = "docker"
 
-      template {
-        destination = local.core_file
-        data        = var.corefile
-      }
-
       env {
-        NOMAD_ADDR  = var.nomad_addr
-        NOMAD_TOKEN = var.nomad_token
-        CACHE_TTL   = var.cache_ttl
-        DNS_ZONE    = var.dns_zone
+        MONGO_INITDB_ROOT_USERNAME = "admin"
+        MONGO_INITDB_ROOT_PASSWORD = var.admin_password
       }
 
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
         ports       = ["dns"]
+        args        = ["mongod", "--auth", "--replSet", var.replicaset_name]
         dns_servers = var.service_dns
-        args        = ["coredns", "-conf", local.core_file]
+        volumes = compact([
+          var.data == "" ? "" : format("%s:/data/db", var.data)
+        ])
       }
-
     } // task "daemon"
-  }   // group "coredns"
-}     // job "coredns"
+  }   // group "mongodb"
+}     // job "mongodb"

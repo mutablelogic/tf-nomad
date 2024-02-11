@@ -6,18 +6,18 @@
 // VARIABLES
 
 variable "dc" {
-  description = "Data centers that the job is eligible to run in"
+  description = "data centers that the job is eligible to run in"
   type        = list(string)
 }
 
 variable "namespace" {
-  description = "Namespace that the job runs in"
+  description = "namespace that the job runs in"
   type        = string
   default     = "default"
 }
 
 variable "hosts" {
-  description = "Host constraint for the job, if empty exactly one allocation will be created"
+  description = "host constraint for the job, defaults to one host"
   type        = list(string)
   default     = []
 }
@@ -26,6 +26,24 @@ variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
   default     = "nomad"
+}
+
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "grafana-http"
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
 }
 
 variable "docker_image" {
@@ -38,6 +56,8 @@ variable "docker_always_pull" {
   type        = bool
   default     = false
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
   description = "Port for plaintext connections"
@@ -84,9 +104,9 @@ variable "anonymous_role" {
 // LOCALS
 
 locals {
-  logs_path =  "${NOMAD_ALLOC_DIR}/logs"
-  db_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
-  plugins_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
+  logs_path         = "${NOMAD_ALLOC_DIR}/logs"
+  db_path           = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
+  plugins_path      = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
   provisioning_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/provisioning" : "/var/lib/grafana/provisioning"
 }
 
@@ -94,7 +114,7 @@ locals {
 // JOB
 
 job "grafana" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -107,10 +127,10 @@ job "grafana" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "grafana" {
-    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
-      for_each = length(var.hosts) == 0 ? [] : [ join(",", var.hosts) ]
+      for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
       content {
         attribute = node.unique.name
         operator  = "set_contains_any"
@@ -154,16 +174,15 @@ job "grafana" {
       }
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        ports      = ["http"]
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        ports       = ["http"]
+        dns_servers = var.service_dns
         volumes = compact([
           var.data == "" ? "" : format("%s:/var/lib/grafana", var.data)
         ])
       }
 
     } // task "daemon"
-
   } // group "grafana"
-
 } // job "grafana"

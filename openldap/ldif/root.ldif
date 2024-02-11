@@ -1,17 +1,10 @@
 
-# Root
-dn: {{ env "NOMAD_META_basedn" }}
-objectClass: top
-objectClass: domain
-dc: {{ env "NOMAD_META_organization" }}
-description: Organization
-
 # Groups
 dn: ou={{ env "NOMAD_META_groups" }},{{ env "NOMAD_META_basedn" }}
 ou: {{ env "NOMAD_META_groups" }}
 objectClass: top
 objectClass: organizationalUnit
-description: User groups
+description: Groups
 
 # Users
 dn: ou={{ env "NOMAD_META_users" }},{{ env "NOMAD_META_basedn" }}
@@ -19,4 +12,3 @@ ou: {{ env "NOMAD_META_users" }}
 objectClass: top
 objectClass: organizationalUnit
 description: Users
-

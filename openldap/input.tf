@@ -16,6 +16,12 @@ variable "enabled" {
   default     = true
 }
 
+variable "docker_tag" {
+  type        = string
+  description = "Version of the docker image to use, defaults to latest"
+  default     = "latest"
+}
+
 variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
@@ -34,15 +40,15 @@ variable "service_dns" {
   default     = []
 }
 
-variable "docker_tag" {
+variable "service_type" {
+  description = "Run as a service or system"
   type        = string
-  description = "Version of the docker image to use, defaults to latest"
-  default     = "latest"
+  default     = "service"
 }
 
 variable "hosts" {
   type        = list(string)
-  description = "List of hosts to deploy on, defaults to one host"
+  description = "List of hosts to deploy on. If empty, one allocation will be created"
   default     = []
 }
 
@@ -55,7 +61,7 @@ variable "port" {
 variable "data" {
   type        = string
   description = "Directory for data persistence"
-  default = ""
+  default     = ""
 }
 
 variable "admin_password" {
@@ -64,12 +70,23 @@ variable "admin_password" {
   sensitive   = true
 }
 
-variable "basedn" {
-  description = "LDAP distinguished name (required)"
+variable "config_password" {
+  description = "LDAP config password"
   type        = string
 }
 
+variable "replication_hosts" {
+  description = "LDAP urls for replication"
+  type        = list(string)
+  default     = []
+}
+
 variable "organization" {
-  description = "Organization name (required)"
+  description = "Organization name"
+  type        = string
+}
+
+variable "domain" {
+  description = "Organization domain"
   type        = string
 }

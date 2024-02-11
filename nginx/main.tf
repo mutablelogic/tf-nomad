@@ -6,10 +6,15 @@ resource "nomad_job" "nginx" {
   hcl2 {
     allow_fs = true
     vars = {
-      dc                 = jsonencode([var.dc])
+    dc                 = jsonencode([var.dc])
       namespace          = var.namespace
+      hosts              = jsonencode(var.hosts)
       docker_image       = local.docker_image
       docker_always_pull = jsonencode(local.docker_always_pull)
+      service_provider   = var.service_provider
+      service_dns        = jsonencode(var.service_dns)
+      service_type       = var.service_type
+
       hosts              = jsonencode(var.hosts)
       ports              = jsonencode(var.ports)
       config             = chomp(file("${path.module}/config/nginx.conf"))
