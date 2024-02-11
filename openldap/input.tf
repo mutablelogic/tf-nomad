@@ -90,3 +90,9 @@ variable "domain" {
   description = "Organization domain"
   type        = string
 }
+
+variable "debug" {
+  description = "Debug output"
+  type        = bool
+  default     = false
+}
