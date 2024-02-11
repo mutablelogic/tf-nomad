@@ -57,6 +57,12 @@ variable "docker_always_pull" {
   default     = false
 }
 
+variable "debug" {
+  description = "Debug output"
+  type        = bool
+  default     = false
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
@@ -110,12 +116,6 @@ variable "ldif" {
 variable "schema" {
   description = "Custom schemas, optional"
   type        = map(string)
-}
-
-variable "debug" {
-  description = "Debug output"
-  type        = bool
-  default     = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -211,6 +211,7 @@ job "openldap" {
         LDAP_REMOVE_CONFIG_AFTER_SETUP = "false"
         LDAP_SEED_INTERNAL_LDIF_PATH   = length(var.ldif) == 0 ? "" : local.ldif_path
         LDAP_SEED_INTERNAL_SCHEMA_PATH = length(var.schema) == 0 ? "" : local.schema_path
+        LDAP_REPLICATION               = length(var.replication_hosts) == 0 ? "false" : "true"
         LDAP_REPLICATION_HOSTS         = length(var.replication_hosts) == 0 ? "" : format("#PYTHON2BASH:%s", jsonencode(var.replication_hosts))
         LDAP_TLS                       = "false"
       }

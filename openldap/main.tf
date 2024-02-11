@@ -15,6 +15,7 @@ resource "nomad_job" "openldap" {
       service_name       = var.service_name
       service_dns        = jsonencode(var.service_dns)
       service_type       = var.service_type
+      debug              = var.debug
 
       port              = var.port
       data              = var.data
