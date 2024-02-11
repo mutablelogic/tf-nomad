@@ -1,12 +1,14 @@
 {{ env "DNS_ZONE" }} {
+    errors
+    debug
+    health
+    log
     nomad {
         address {{ env "NOMAD_ADDR" }}
         token {{ env "NOMAD_TOKEN" }}
         ttl {{ env "CACHE_TTL" }}
     }
     cache {{ env "CACHE_TTL" }}
-    errors
-    log
 }
 
 . {
