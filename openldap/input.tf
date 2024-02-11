@@ -61,7 +61,7 @@ variable "port" {
 variable "data" {
   type        = string
   description = "Directory for data persistence"
-  default = ""
+  default     = ""
 }
 
 variable "admin_password" {
@@ -70,12 +70,23 @@ variable "admin_password" {
   sensitive   = true
 }
 
-variable "basedn" {
-  description = "LDAP distinguished name (required)"
+variable "config_password" {
+  description = "LDAP config password"
   type        = string
 }
 
+variable "replication_hosts" {
+  description = "LDAP urls for replication"
+  type        = list(string)
+  default     = []
+}
+
 variable "organization" {
-  description = "Organization name (required)"
+  description = "Organization name"
+  type        = string
+}
+
+variable "domain" {
+  description = "Organization domain"
   type        = string
 }

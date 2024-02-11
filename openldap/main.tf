@@ -16,20 +16,19 @@ resource "nomad_job" "openldap" {
       service_dns        = jsonencode(var.service_dns)
       service_type       = var.service_type
 
-      port           = var.port
-      data           = var.data
-      admin_password = var.admin_password
-      basedn         = var.basedn
-      organization   = var.organization
+      port              = var.port
+      data              = var.data
+      admin_password    = var.admin_password
+      config_password   = var.config_password
+      replication_hosts = jsonencode(var.replication_hosts)
+      organization      = var.organization
+      domain            = var.domain
 
       # LDIF templates which are only applied when the data directory is empty (first run)
       ldif = jsonencode({
         "root" = file("${path.module}/ldif/root.ldif")
       })
-      schema = jsonencode({
-        "memberOf"   = file("${path.module}/schema/memberOf.ldif"),
-        "rfc2307bis" = file("${path.module}/schema/rfc2307bis.ldif")
-      })
+      schema = jsonencode({})
     }
   }
 }

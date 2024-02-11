@@ -1,6 +1,6 @@
 
 // OpenLDAP server
-// Docker Image: https://bitnami.com/stack/openldap
+// Docker Image: https://github.com/osixia/docker-openldap
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "coredns-dns"
+  default     = "openldap-ldap"
 }
 
 variable "service_dns" {
@@ -65,10 +65,41 @@ variable "port" {
   default     = 389
 }
 
+variable "tls_port" {
+  description = "Port for TLS connections"
+  type        = number
+  default     = 636
+}
+
 variable "data" {
   description = "Data persistence directory"
   type        = string
   default     = ""
+}
+
+variable "admin_password" {
+  description = "LDAP admin password"
+  type        = string
+}
+
+variable "config_password" {
+  description = "LDAP config password"
+  type        = string
+}
+
+variable "replication_hosts" {
+  description = "LDAP urls for replication"
+  type        = list(string)
+}
+
+variable "organization" {
+  description = "Organization name"
+  type        = string
+}
+
+variable "domain" {
+  description = "Organization domain"
+  type        = string
 }
 
 variable "ldif" {
@@ -81,33 +112,18 @@ variable "schema" {
   type        = map(string)
 }
 
-variable "extra_schemas" {
-  description = "Extra schemas, optional"
-  type        = string
-  default     = "cosine,inetorgperson"
-}
-
-variable "admin_password" {
-  description = "LDAP admin password"
-  type        = string
-}
-
-variable "basedn" {
-  description = "Distinguished name"
-  type        = string
-}
-
-variable "organization" {
-  description = "Organization name"
-  type        = string
+variable "debug" {
+  description = "Debug output"
+  type        = bool
+  default     = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
 locals {
-  ldif_path   = format("%s/data/ldif",NOMAD_ALLOC_DIR)
-  schema_path   = format("%s/data/schema",NOMAD_ALLOC_DIR)
+  ldif_path   = format("%s/data/ldif", NOMAD_ALLOC_DIR)
+  schema_path = format("%s/data/schema", NOMAD_ALLOC_DIR)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -143,6 +159,10 @@ job "openldap" {
         static = var.port
         to     = 389
       }
+      port "ldaps" {
+        static = var.tls_port
+        to     = 636
+      }
     }
 
     service {
@@ -154,12 +174,12 @@ job "openldap" {
 
     task "daemon" {
       driver = "docker"
-      user   = "root"
 
       // Metadata for ldif and schema templates
       meta {
-        basedn       = var.basedn
         organization = var.organization
+        domain       = "{{ LDAP_DOMAIN }}"
+        basedn       = "{{ LDAP_BASE_DN }}"
         users        = "users"
         groups       = "groups"
       }
@@ -183,27 +203,27 @@ job "openldap" {
       }
 
       env {
-        LDAP_ADMIN_USERNAME     = "admin"
-        LDAP_ADMIN_PASSWORD     = var.admin_password
-        LDAP_PORT_NUMBER        = NOMAD_PORT_ldap
-        LDAP_ROOT               = var.basedn
-        LDAP_ADD_SCHEMAS        = var.extra_schemas == "" ? "no" : "yes"
-        LDAP_EXTRA_SCHEMAS      = var.extra_schemas
-        LDAP_SKIP_DEFAULT_TREE  = "yes"
-        LDAP_CUSTOM_LDIF_DIR    = local.ldif_path
-        //LDAP_CUSTOM_SCHEMA_DIR  = local.schema_path
-        LDAP_CONFIGURE_PPOLICY  = "yes"
-        LDAP_ALLOW_ANON_BINDING = "no"
-        BITNAMI_DEBUG           = "true"
+        LDAP_DOMAIN                    = var.domain
+        LDAP_ORGANISATION              = var.organization
+        LDAP_ADMIN_PASSWORD            = var.admin_password
+        LDAP_CONFIG_PASSWORD           = var.config_password
+        LDAP_RFC2307BIS_SCHEMA         = "true"
+        LDAP_REMOVE_CONFIG_AFTER_SETUP = "false"
+        LDAP_SEED_INTERNAL_LDIF_PATH   = length(var.ldif) == 0 ? "" : local.ldif_path
+        LDAP_SEED_INTERNAL_SCHEMA_PATH = length(var.schema) == 0 ? "" : local.schema_path
+        LDAP_REPLICATION_HOSTS         = length(var.replication_hosts) == 0 ? "" : format("#PYTHON2BASH:%s", jsonencode(var.replication_hosts))
+        LDAP_TLS                       = "false"
       }
 
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
-        ports       = ["ldap"]
+        ports       = ["ldap", "ldaps"]
         dns_servers = var.service_dns
+        args        = ["--copy-service", "--loglevel", var.debug ? "debug" : "info"]
         volumes = compact([
-          var.data == "" ? "" : format("%s:/bitnami/openldap", var.data),
+          var.data == "" ? "" : format("%s/data:/var/lib/ldap", var.data),
+          var.data == "" ? "" : format("%s/slapd.d:/etc/ldap/slapd.d", var.data),
         ])
       }
 
