@@ -46,6 +46,12 @@ variable "service_type" {
   default     = "service"
 }
 
+variable "debug" {
+  type        = bool
+  description = "Debugging log output"
+  default     = false
+}
+
 variable "hosts" {
   type        = list(string)
   description = "List of hosts to deploy on. If empty, one allocation will be created"

@@ -1,6 +1,6 @@
 {{ env "DNS_ZONE" }} {
     errors
-    debug
+    {{ env "DEBUG" }}
     health
     log
     nomad {

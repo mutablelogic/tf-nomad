@@ -57,6 +57,12 @@ variable "docker_always_pull" {
   default     = false
 }
 
+variable "debug" {
+  type        = bool
+  description = "Debugging log output"
+  default     = false
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
@@ -159,6 +165,7 @@ job "coredns" {
         NOMAD_TOKEN = var.nomad_token
         CACHE_TTL   = var.cache_ttl
         DNS_ZONE    = var.dns_zone
+        DEBUG       = var.debug ? "debug" : ""
       }
 
       config {
