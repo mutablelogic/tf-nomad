@@ -1,6 +1,6 @@
 
 // postgres database server
-// Docker Image: https://hub.docker.com/_/postgres
+// Docker Image: https://hub.docker.com/timescale/timescaledb
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
@@ -26,6 +26,23 @@ variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
   default     = "nomad"
+}
+
+variable "service_name" {
+  description = "Service name"
+  type        = string
+}
+
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
 }
 
 variable "docker_image" {
@@ -72,7 +89,7 @@ locals {
 // JOB
 
 job "postgresql" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -85,7 +102,7 @@ job "postgresql" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "postgresql" {
-    count = length(var.hosts) == 0 ? 1 : length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
       for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
@@ -105,8 +122,8 @@ job "postgresql" {
 
     service {
       tags     = ["postgresql"]
-      name     = "postgresql"
-      port     = "postgresql"
+      name     = var.service_name
+      port     = "posygresql"
       provider = var.service_provider
     }
 
@@ -118,9 +135,10 @@ job "postgresql" {
       driver = "docker"
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        ports      = ["postgresql"]
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        ports       = ["postgresql"]
+        dns_servers = var.service_dns
         volumes = compact([
           var.data == "" ? "" : format("%s:/var/lib/postgresql", var.data)
         ])
