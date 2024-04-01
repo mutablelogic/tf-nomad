@@ -22,6 +22,17 @@ DNS server which could be used to resolve nomad services into dns records
 TODO:
   * [ ] All nomad jobs will need to use the coredns service as a dns_server option
 
+## github-action-runner
+
+GitHub action runner, which can be placed on several nodes
+
+   * [Documentation](https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners)
+   * [Terraform Example](_examples/github-action-runner.tf)
+   * [Nomad Job](github-action-runner/nomad/github-action-runner.hcl)
+
+TODO:
+  * [ ] Remove runner from github when job is removed
+
 ## grafana
 
 grafana is a database server
