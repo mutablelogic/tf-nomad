@@ -31,6 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
+  default     = "postgresql"
 }
 
 variable "service_dns" {
@@ -121,9 +122,9 @@ job "postgresql" {
     }
 
     service {
-      tags     = ["postgresql"]
+      tags     = ["postgresql","postgres"]
       name     = var.service_name
-      port     = "posygresql"
+      port     = "postgresql"
       provider = var.service_provider
     }
 
