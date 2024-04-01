@@ -50,3 +50,27 @@ variable "organization" {
   description = "Github organization"
   type        = string
 }
+
+variable "name" {
+  description = "Github runner name"
+  type        = string
+  default     = ""
+}
+
+variable "group" {
+  description = "Github runner group"
+  type        = string
+  default     = ""
+}
+
+variable "labels" {
+  description = "Github runner labels"
+  type        = list(string)
+  default     = []
+}
+
+variable "data" {
+  description = "Data persistence directory, optional"
+  type        = string
+  default     = ""
+}

@@ -57,11 +57,38 @@ variable "organization" {
   type        = string
 }
 
+variable "name" {
+  description = "Github runner name"
+  type        = string
+  default     = ""
+}
+
+variable "group" {
+  description = "Github runner group"
+  type        = string
+  default     = ""
+}
+
+variable "labels" {
+  description = "Github runner labels"
+  type        = list(string)
+  default     = []
+}
+
+variable "data" {
+  description = "Data persistence directory, optional"
+  type        = string
+  default     = ""
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
 locals {
+  DATA       = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : var.data
   TOKEN_PATH = "${NOMAD_ALLOC_DIR}/data/token.txt"
+  NAME       = var.name == "" ? node.unique.name : var.name
+  LABELS     = join(",", var.labels)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,8 +119,8 @@ job "github-action-runner" {
       }
     }
 
-    // token task runs to obtain a runner token
-    task "token" {
+    // auth task runs to obtain a runner token
+    task "auth" {
       driver = "docker"
 
       lifecycle {
@@ -101,20 +128,45 @@ job "github-action-runner" {
         sidecar = false
       }
 
-      env {
-        ACCESS_TOKEN = var.access_token
-        ORGANIZATION = var.organization
-      }
-
       config {
         image       = "curlimages/curl"
         dns_servers = var.service_dns
         args = [
-          "sh", 
+          "sh",
           "-c",
-          "curl -s -X \"POST\" -H \"Authorization: token ${ACCESS_TOKEN}\" https://api.github.com/orgs/${ORGANIZATION}/actions/runners/registration-token > ${TOKEN_PATH}"
+          <<-EOF
+            curl -s -X "POST" -H "Authorization: token ${var.access_token}" https://api.github.com/orgs/${var.organization}/actions/runners/registration-token \
+              | awk -F\" "\$2 ~ /token/ { print \$4; exit }" > ${local.TOKEN_PATH}
+          EOF
         ]
       }
-    } // task "token"
-  }   // group "grafana"
-}     // job "grafana"
+    } // task "auth"
+
+    // runner task uses the token to create the config then run the runner
+    task "runner" {
+      driver = "docker"
+
+      config {
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        dns_servers = var.service_dns
+        args = [
+          "sh",
+          "-c",
+          <<-EOF
+               ./config.sh \
+                 --work "${local.DATA}" \
+                 --name "${local.NAME}" \
+                 --runnergroup "${var.group}" \
+                 --labels "${local.LABELS}" \
+                 --url "https://github.com/${var.organization}" \
+                 --token $(head ${local.TOKEN_PATH}) \
+                 --unattended \
+                 --replace \
+            && ./run.sh 
+          EOF
+        ]
+      }
+    } // task "runner"
+  }   // group "github-action-runner"
+}     // job "github-action-runner"
