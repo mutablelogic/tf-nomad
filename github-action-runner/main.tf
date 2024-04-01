@@ -13,8 +13,12 @@ resource "nomad_job" "github-action-runner" {
       service_dns        = jsonencode(var.service_dns)
       service_type       = var.service_type
 
+      // Runner parameters
       access_token = var.access_token
       organization = var.organization
+      name         = var.name
+      group        = var.group
+      labels       = jsonencode(var.labels)
     }
   }
 }
