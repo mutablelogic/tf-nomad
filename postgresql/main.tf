@@ -14,11 +14,12 @@ resource "nomad_job" "postgresql" {
       service_dns        = jsonencode(var.service_dns)
       service_type       = var.service_type
 
-      hosts              = jsonencode(var.hosts)
-      port               = var.port
-      data               = var.data
-      root_password      = var.root_password
-      database           = var.database
+      hosts         = jsonencode(var.hosts)
+      port          = var.port
+      data          = var.data
+      root_user     = var.root_user
+      root_password = var.root_password
+      database      = var.database
     }
   }
 }

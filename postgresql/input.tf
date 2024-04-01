@@ -64,6 +64,12 @@ variable "data" {
   default     = ""
 }
 
+variable "root_user" {
+  description = "root user"
+  type        = string
+  default     = "postgres"
+}
+
 variable "root_password" {
   description = "root password (required)"
   type        = string

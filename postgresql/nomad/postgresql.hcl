@@ -68,6 +68,12 @@ variable "data" {
   type        = string
 }
 
+variable "root_user" {
+  description = "root user"
+  type        = string
+  default     = "postgres"
+}
+
 variable "root_password" {
   description = "root password"
   type        = string
@@ -122,7 +128,7 @@ job "postgresql" {
     }
 
     service {
-      tags     = ["postgresql","postgres"]
+      tags     = ["postgresql", "postgres"]
       name     = var.service_name
       port     = "postgresql"
       provider = var.service_provider
@@ -146,7 +152,7 @@ job "postgresql" {
       }
 
       env {
-        POSTGRES_USER     = "root"
+        POSTGRES_USER     = var.root_user
         POSTGRES_PASSWORD = var.root_password
         POSTGRES_DB       = var.database
         PGDATA            = local.data_path
