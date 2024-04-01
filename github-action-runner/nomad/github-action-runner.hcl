@@ -58,6 +58,13 @@ variable "organization" {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  TOKEN_PATH = "${NOMAD_ALLOC_DIR}/data/token.txt"
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // JOB
 
 job "github-action-runner" {
@@ -105,7 +112,7 @@ job "github-action-runner" {
         args = [
           "sh", 
           "-c",
-          "curl -s -X \"POST\" -H \"Authorization: token ${ACCESS_TOKEN}\" https://api.github.com/orgs/${ORGANIZATION}/actions/runners/registration-token"
+          "curl -s -X \"POST\" -H \"Authorization: token ${ACCESS_TOKEN}\" https://api.github.com/orgs/${ORGANIZATION}/actions/runners/registration-token > ${TOKEN_PATH}"
         ]
       }
     } // task "token"
