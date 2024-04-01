@@ -89,7 +89,7 @@ variable "database" {
 // LOCALS
 
 locals {
-  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql"
+  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
