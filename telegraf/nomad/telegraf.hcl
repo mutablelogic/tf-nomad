@@ -16,6 +16,18 @@ variable "namespace" {
   default     = "default"
 }
 
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
+}
+
 variable "hosts" {
   description = "host constraint for the job"
   type        = list(string)
@@ -47,7 +59,7 @@ variable "inputs" {
 // JOB
 
 job "telegraf" {
-  type        = "service"
+  type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -60,12 +72,15 @@ job "telegraf" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "telegraf" {
-    count = length(var.hosts)
+    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
-    constraint {
-      attribute = node.unique.name
-      operator  = "set_contains_any"
-      value     = join(",", var.hosts)
+    dynamic "constraint" {
+      for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
+      content {
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = constraint.value
+      }
     }
 
     task "daemon" {
@@ -75,10 +90,31 @@ job "telegraf" {
       template {
         destination = "local/config/global_tags.conf"
         data        = <<-EOF
-
         [global_tags]
         dc = "${NOMAD_DC}"
         namespace = "${NOMAD_NAMESPACE}"
+        region = "${NOMAD_REGION}"
+        EOF
+      }
+
+      // Agent templates
+      template {
+        destination = "local/config/agent.conf"
+        data        = <<-EOF
+        [agent]
+        interval = "10s"
+        round_interval = true
+        metric_batch_size = 1000
+        metric_buffer_limit = 10000
+        collection_jitter = "0s"
+        flush_interval = "10s"
+        flush_jitter = "0s"
+        precision = ""
+        debug = false
+        quiet = false
+        logtarget = "stderr"
+        hostname = "${HOST_NAME}"
+        omit_hostname = false
         EOF
       }
 
@@ -113,12 +149,13 @@ job "telegraf" {
         HOST_SYS          = "/hostfs/sys"
         HOST_VAR          = "/hostfs/var"
         HOST_RUN          = "/hostfs/run"
-        HOST_NAME         = node.unique.name
+        HOST_NAME         = "${node.unique.name}"
       }
 
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        dns_servers = var.service_dns
         volumes = compact([
           "/:/hostfs:ro",
           "local/config:/etc/telegraf",
