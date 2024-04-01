@@ -22,12 +22,6 @@ variable "docker_tag" {
   default     = "latest"
 }
 
-variable "service_provider" {
-  description = "Service provider, either consul or nomad"
-  type        = string
-  default     = "nomad"
-}
-
 variable "service_dns" {
   description = "Service discovery DNS"
   type        = list(string)
@@ -46,14 +40,13 @@ variable "hosts" {
   default     = []
 }
 
-variable "port" {
-  description = "Port for connections"
-  type        = number
-  default     = 9090
+variable "access_token" {
+  description = "Github access token"
+  type        = string
+  sensitive   = true
 }
 
-variable "data" {
-  description = "Data persistence directory"
+variable "organization" {
+  description = "Github organization"
   type        = string
-  default     = ""
 }

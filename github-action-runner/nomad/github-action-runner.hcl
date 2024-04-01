@@ -1,6 +1,6 @@
 
-// mongodb document database
-// Docker Image: https://hub.docker.com/_/mongo
+// github action runner
+// Docker Image: ghcr.io/actions/actions-runner
 
 ///////////////////////////////////////////////////////////////////////////////
 // VARIABLES
@@ -22,18 +22,6 @@ variable "hosts" {
   default     = []
 }
 
-variable "service_provider" {
-  description = "Service provider, either consul or nomad"
-  type        = string
-  default     = "nomad"
-}
-
-variable "service_name" {
-  description = "Service name"
-  type        = string
-  default     = "mongodb"
-}
-
 variable "service_dns" {
   description = "Service discovery DNS"
   type        = list(string)
@@ -44,12 +32,6 @@ variable "service_type" {
   description = "Run as a service or system"
   type        = string
   default     = "service"
-}
-
-variable "dns_servers" {
-  description = "Task DNS servers"
-  type        = list(string)
-  default     = []
 }
 
 variable "docker_image" {
@@ -63,34 +45,22 @@ variable "docker_always_pull" {
   default     = false
 }
 
-variable "port" {
-  description = "Port for plaintext connections"
-  type        = number
-  default     = 27017
+///////////////////////////////////////////////////////////////////////////////
+
+variable "access_token" {
+  description = "Github access token"
+  type        = string
 }
 
-variable "data" {
+variable "organization" {
+  description = "Github organization"
   type        = string
-  description = "Directory for data persistence"
-  default     = ""
-}
-
-variable "admin_password" {
-  description = "password for 'admin' user (required)"
-  type        = string
-  sensitive   = true
-}
-
-variable "replicaset_name" {
-  description = "replica set name"
-  type        = string
-  default    = "rs0"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
-job "mongodb" {
+job "github-action-runner" {
   type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
@@ -103,7 +73,7 @@ job "mongodb" {
 
   /////////////////////////////////////////////////////////////////////////////////
 
-  group "mongodb" {
+  group "github-action-runner" {
     count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
 
     dynamic "constraint" {
@@ -115,42 +85,29 @@ job "mongodb" {
       }
     }
 
-    network {
-      port "mongodb" {
-        static = var.port
-        to     = 27017
-      }
-    }
-
-    service {
-      tags     = ["mongodb"]
-      name     = var.service_name
-      port     = "mongodb"
-      provider = var.service_provider
-    }
-
-    ephemeral_disk {
-      migrate = true
-    }
-
-    task "server" {
+    // token task runs to obtain a runner token
+    task "token" {
       driver = "docker"
 
+      lifecycle {
+        hook    = "prestart"
+        sidecar = false
+      }
+
       env {
-        MONGO_INITDB_ROOT_USERNAME = "admin"
-        MONGO_INITDB_ROOT_PASSWORD = var.admin_password
+        ACCESS_TOKEN = var.access_token
+        ORGANIZATION = var.organization
       }
 
       config {
-        image       = var.docker_image
-        force_pull  = var.docker_always_pull
-        ports       = ["dns"]
-        args        = ["mongod", "--auth", "--replSet", var.replicaset_name]
+        image       = "curlimages/curl"
         dns_servers = var.service_dns
-        volumes = compact([
-          var.data == "" ? "" : format("%s:/data/db", var.data)
-        ])
+        args = [
+          "sh", 
+          "-c",
+          "curl -s -X \"POST\" -H \"Authorization: token ${ACCESS_TOKEN}\" https://api.github.com/orgs/${ORGANIZATION}/actions/runners/registration-token"
+        ]
       }
-    } // task "daemon"
-  }   // group "mongodb"
-}     // job "mongodb"
+    } // task "token"
+  }   // group "grafana"
+}     // job "grafana"
