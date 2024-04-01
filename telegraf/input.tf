@@ -22,6 +22,18 @@ variable "docker_tag" {
   default     = "latest"
 }
 
+variable "service_dns" {
+  description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "service_type" {
+  description = "Run as a service or system"
+  type        = string
+  default     = "service"
+}
+
 variable "hosts" {
   type        = list(string)
   description = "List of hosts to deploy on (required)"
