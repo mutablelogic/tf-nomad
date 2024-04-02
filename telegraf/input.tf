@@ -37,6 +37,7 @@ variable "service_type" {
 variable "hosts" {
   type        = list(string)
   description = "List of hosts to deploy on (required)"
+  default     = []
 }
 
 variable "outputs" {
