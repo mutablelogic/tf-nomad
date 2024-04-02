@@ -94,8 +94,8 @@ variable "database" {
   default     = { type : "", host : "", port : 0, name : "", user : "", password : "", ssl_mode : "" }
 }
 
-variable "domain" {
-  description = "Domain used for serving the application"
+variable "url" {
+  description = "URL used for serving the application"
   type        = string
   default     = ""
 }
