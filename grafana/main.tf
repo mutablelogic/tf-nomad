@@ -23,7 +23,8 @@ resource "nomad_job" "grafana" {
       anonymous_enabled = var.anonymous
       anonymous_org     = ""
       anonymous_role    = "Viewer"
-      database = jsonencode(var.database)
+      database          = jsonencode(var.database)
+      domain            = var.domain
     }
   }
 }

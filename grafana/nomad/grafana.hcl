@@ -112,6 +112,12 @@ variable "database" {
   default     = { type : "", host : "", port : 0, name : "", user : "", password : "", ssl_mode : "" }
 }
 
+variable "domain" {
+  description = "Domain used for serving the application"
+  type        = string
+  default     = ""
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
@@ -208,6 +214,7 @@ job "grafana" {
         GF_DATABASE_USER           = var.database.user
         GF_DATABASE_PASSWORD       = var.database.password
         GF_DATABASE_SSL_MODE       = var.database.ssl_mode
+        GF_SERVER_DOMAIN           = var.domain
       }
 
       config {
