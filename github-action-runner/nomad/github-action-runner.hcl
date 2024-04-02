@@ -150,6 +150,11 @@ job "github-action-runner" {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
         dns_servers = var.service_dns
+        privileged  = true
+        userns_mode = "host"
+        volumes = [
+          "/var/run/docker.sock:/var/run/docker.sock",
+        ]        
         args = [
           "sh",
           "-c",
