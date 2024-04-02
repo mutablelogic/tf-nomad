@@ -89,7 +89,7 @@ variable "database" {
 // LOCALS
 
 locals {
-  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data"
+  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data/pgdata"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,7 +147,7 @@ job "postgresql" {
         ports       = ["postgresql"]
         dns_servers = var.service_dns
         volumes = compact([
-          var.data == "" ? "" : format("%s:/var/lib/postgresql", var.data)
+          var.data == "" ? "" : format("%s:/var/lib/postgresql/data", var.data)
         ])
       }
 
