@@ -122,8 +122,10 @@ job "telegraf" {
       dynamic "template" {
         for_each = var.outputs
         content {
-          destination = "local/config/output_${template.key}.conf"
-          data        = <<-EOF
+          destination     = "local/config/output_${template.key}.conf"
+          left_delimiter  = "{{{"
+          right_delimiter = "}}}"
+          data            = <<-EOF
           [[outputs.${template.key}]]
           ${join("\n", [for k, v in template.value : "${k} = ${v}"])}
           EOF
@@ -149,7 +151,7 @@ job "telegraf" {
         HOST_SYS          = "/hostfs/sys"
         HOST_VAR          = "/hostfs/var"
         HOST_RUN          = "/hostfs/run"
-        HOST_NAME         = "${node.unique.name}"
+        HOST_NAME         = node.unique.name
       }
 
       config {
