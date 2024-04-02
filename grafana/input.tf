@@ -93,3 +93,9 @@ variable "database" {
   type        = object({ type = string, host = string, port = number, name = string, user = string, password = string, ssl_mode = string })
   default     = { type : "", host : "", port : 0, name : "", user : "", password : "", ssl_mode : "" }
 }
+
+variable "domain" {
+  description = "Domain used for serving the application"
+  type        = string
+  default     = ""
+}
