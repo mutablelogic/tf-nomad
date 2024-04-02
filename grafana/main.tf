@@ -4,7 +4,6 @@ resource "nomad_job" "grafana" {
   jobspec = file("${path.module}/nomad/grafana.hcl")
 
   hcl2 {
-    allow_fs = true
     vars = {
       dc                 = jsonencode([var.dc])
       namespace          = var.namespace
@@ -18,11 +17,13 @@ resource "nomad_job" "grafana" {
 
       port              = var.port
       data              = var.data
+      admin_user        = var.admin_user
       admin_password    = var.admin_password
       admin_email       = var.admin_email
       anonymous_enabled = var.anonymous
       anonymous_org     = ""
       anonymous_role    = "Viewer"
+      database = jsonencode(var.database)
     }
   }
 }

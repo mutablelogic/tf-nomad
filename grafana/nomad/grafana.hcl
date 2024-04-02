@@ -71,6 +71,12 @@ variable "data" {
   default     = ""
 }
 
+variable "admin_user" {
+  description = "Name for 'admin' user (optional)"
+  type        = string
+  default     = "admin"
+}
+
 variable "admin_password" {
   description = "Password for 'admin' user (required)"
   type        = string
@@ -100,6 +106,12 @@ variable "anonymous_role" {
   default     = "Viewer"
 }
 
+variable "database" {
+  description = "Database connection parameters"
+  type        = object({ type = string, host = string, port = number, name = string, user = string, password = string, ssl_mode = string })
+  default     = { type : "", host : "", port : 0, name : "", user : "", password : "", ssl_mode : "" }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
@@ -108,6 +120,7 @@ locals {
   db_path           = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/db" : "/var/lib/grafana/data"
   plugins_path      = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/plugins" : "/var/lib/grafana/plugins"
   provisioning_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data/provisioning" : "/var/lib/grafana/provisioning"
+  db_host           = var.database.host == "" ? "" : format("%s:%d", var.database.host, var.database.port == 0 ? 5432 : var.database.port)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,6 +169,24 @@ job "grafana" {
       migrate = true
     }
 
+    task "init" {
+      driver = "raw_exec"
+
+      lifecycle {
+        sidecar = false
+        hook    = "prestart"
+      }
+
+      config {
+        // Set permissions on the directory
+        command = var.data == "" ? "/usr/bin/echo" : "/usr/bin/install"
+        args = compact([
+          "-d", var.data,
+          "-o", "472"
+        ])
+      }
+    } // task "init"
+
     task "daemon" {
       driver = "docker"
 
@@ -164,13 +195,19 @@ job "grafana" {
         GF_PATHS_DATA              = local.db_path
         GF_PATHS_PLUGINS           = local.plugins_path
         GF_PATHS_PROVISIONING      = local.provisioning_path
-        GF_SECURITY_ADMIN_USER     = "admin"
+        GF_SECURITY_ADMIN_USER     = var.admin_user
         GF_SECURITY_ADMIN_PASSWORD = var.admin_password
         GF_SECURITY_ADMIN_EMAIL    = var.admin_email
         GF_AUTH_ANONYMOUS_ENABLED  = var.anonymous_enabled
         GF_AUTH_ANONYMOUS_ORG_NAME = var.anonymous_org
         GF_AUTH_ANONYMOUS_ORG_ROLE = var.anonymous_role
         GF_AUTH_HIDE_VERSION       = true
+        GF_DATABASE_TYPE           = var.database.type
+        GF_DATABASE_HOST           = local.db_host
+        GF_DATABASE_NAME           = var.database.name
+        GF_DATABASE_USER           = var.database.user
+        GF_DATABASE_PASSWORD       = var.database.password
+        GF_DATABASE_SSL_MODE       = var.database.ssl_mode
       }
 
       config {
@@ -184,5 +221,5 @@ job "grafana" {
       }
 
     } // task "daemon"
-  } // group "grafana"
-} // job "grafana"
+  }   // group "grafana"
+}     // job "grafana"

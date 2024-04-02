@@ -64,6 +64,12 @@ variable "data" {
   default     = ""
 }
 
+variable "admin_user" {
+  description = "Name for 'admin' user (optional)"
+  type        = string
+  default     = "admin"
+}
+
 variable "admin_password" {
   description = "Password for 'admin' user (required)"
   type        = string
@@ -80,4 +86,10 @@ variable "anonymous" {
   description = "Allow anonymous access"
   type        = bool
   default     = false
+}
+
+variable "database" {
+  description = "Database connection parameters"
+  type        = object({ type = string, host = string, port = number, name = string, user = string, password = string, ssl_mode = string })
+  default     = { type : "", host : "", port : 0, name : "", user : "", password : "", ssl_mode : "" }
 }
