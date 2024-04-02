@@ -118,6 +118,10 @@ PostgreSQL is a database server
 
 TODO:
   * [ ] LDAP integration
+  * [ ] Add TLS support
+  * [ ] Add replication support
+  * [ ] Use volume instead when the data does not have '/' as prefix
+  * [ ] Add users, databases and roles support on initialization
 
 ## seaweedfs
 
