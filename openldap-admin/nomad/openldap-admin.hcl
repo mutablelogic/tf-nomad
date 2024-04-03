@@ -81,6 +81,12 @@ variable "basedn" {
   type        = string
 }
 
+variable "admin_user" {
+  description = "LDAP admin user"
+  type        = string
+  default     = "admin"
+}
+
 variable "admin_password" {
   description = "LDAP admin password"
   type        = string
@@ -100,6 +106,13 @@ variable "organization" {
 variable "domain" {
   description = "Organization domain"
   type        = string
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  starttls = substr(lower(trimspace(var.url)), 0, 5) == "ldap:" ? "FALSE" : "TRUE"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,15 +157,20 @@ job "openldap-admin" {
       provider = var.service_provider
     }
 
+    ephemeral_disk {
+      migrate = true
+    }
+
     task "daemon" {
       driver = "docker"
 
       env {
         LDAP_URI              = var.url
         LDAP_BASE_DN          = var.basedn
-        LDAP_ADMIN_BIND_DN    = format("cn=admin,%s", var.basedn)
+        LDAP_ADMIN_BIND_DN    = format("cn=%s,%s", var.admin_user, var.basedn)
         LDAP_ADMIN_BIND_PWD   = var.admin_password
         LDAP_ADMINS_GROUP     = var.admin_group
+        LDAP_REQUIRE_STARTTLS = local.starttls
         LDAP_USER_OU          = "users"
         LDAP_GROUP_OU         = "groups"
         NO_HTTPS              = "true"
