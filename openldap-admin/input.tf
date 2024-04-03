@@ -68,6 +68,12 @@ variable "basedn" {
   type        = string
 }
 
+variable "admin_user" {
+  description = "LDAP admin user"
+  type        = string
+  default     = "admin"
+}
+
 variable "admin_password" {
   description = "LDAP admin password"
   type        = string
@@ -82,4 +88,10 @@ variable "organization" {
 variable "domain" {
   description = "Organization domain"
   type        = string
+}
+
+variable "debug" {
+  description = "Debug output"
+  type        = bool
+  default     = false
 }

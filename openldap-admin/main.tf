@@ -4,7 +4,6 @@ resource "nomad_job" "openldap" {
   jobspec = file("${path.module}/nomad/openldap-admin.hcl")
 
   hcl2 {
-    allow_fs = true
     vars = {
       dc                 = jsonencode([var.dc])
       namespace          = var.namespace
@@ -19,9 +18,11 @@ resource "nomad_job" "openldap" {
       port           = var.port
       url            = var.url
       basedn         = var.basedn
+      admin_user     = var.admin_user
       admin_password = var.admin_password
       organization   = var.organization
       domain         = var.domain
+      debug          = var.debug
     }
   }
 }

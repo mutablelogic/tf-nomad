@@ -108,20 +108,34 @@ TODO:
   * [ ] Add replication support 
   * [ ] Add custom schema support
 
+
+## OpenLDAP Administation
+
+OpenLDAP administration, for adding users and groups, and changing
+passwords
+
+   * [Documentation](https://www.openldap.org/)
+   * [Terraform Example](_examples/openldap.tf)
+   * [Nomad Job](openldap/nomad/openldap.hcl)
+
+TODO:
+  * [ ] In progress
+  * [ ] Add TLS support
+  * [ ] Add replication support 
+  * [ ] Add custom schema support
+
+
 ## PostgreSQL
 
 PostgreSQL is a database server
 
-   * [Documentation](https://www.postgresql.org/)
-   * [Terraform Example](_examples/postgresql.tf)
-   * [Nomad Job](postgresql/nomad/postgresql.hcl)
+   * [Documentation](https://github.com/wheelybird/ldap-user-manager)
+   * [Terraform Example](_examples/openldap-admin.tf)
+   * [Nomad Job](postgresql/openldap-admin/openldap-admin.hcl)
 
 TODO:
-  * [ ] LDAP integration
   * [ ] Add TLS support
-  * [ ] Add replication support
-  * [ ] Use volume instead when the data does not have '/' as prefix
-  * [ ] Add users, databases and roles support on initialization
+  * [ ] Add SNMP support
 
 ## seaweedfs
 
