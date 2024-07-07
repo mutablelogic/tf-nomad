@@ -1,40 +1,41 @@
 
-// Example Cluster filesystem using seaweedfs, with one master, two volumes and three filers
-module "clusterfs" {
-  source      = "github.com/mutablelogic/tf-nomad//seaweedfs"
-  enabled     = true         // If false, no-op
-  dc          = "datacenter" // Nomad datacenter for the cluster
-  namespace   = "clusterfs"  // Nomad namespace for the cluster
-  docker_tag  = "latest"     // Pull the latest version of the docker image every job restart
-  metrics     = true         // Provide metrics ports for prometheus pulls
-  webdav      = false        // Enable webdav service on filers
-  s3          = false        // Enable s3 service on filers
-  replication = "000"        // https://github.com/seaweedfs/seaweedfs/wiki/Replication#the-meaning-of-replication-type
-  masters = [
-    {
-      ip = "192.168.86.11"
+// Example Cluster filesystem using seaweedfs, with one master, two volumes and one filer
+module "seaweedfs" {
+  source     = "github.com/mutablelogic/tf-nomad//seaweedfs"
+  enabled    = true // If false, no-op
+  dc         = local.datacenter
+  namespace  = local.namespace
+  docker_tag = "latest" // Pull the latest version of the docker image every job restart
+
+  replication = "000" // https://github.com/seaweedfs/seaweedfs/wiki/Replication#the-meaning-of-replication-type
+  metrics     = false // If true, allow metrics collection by prometheus
+
+  masters = {
+    "192.168.86.12" : {
+      "name" : "cm2",               // Unique name identifying the master server
+      "data" : "/var/lib/seaweedfs" // Persistent data
     }
-  ]
-  volumes = [
-    {
-      ip    = "192.168.86.12",
-      disks = "/mnt/clusterfs", // comma-separated list of mounted disks for storage
-      rack  = "rack1",          // Rack location for this server
-      max   = 0                 // Maximum number of volumes to create on this server, or 0 for auto
-    }, {
-      ip    = "192.168.86.13",
-      disks = "/mnt/clusterfs", // comma-separated list of mounted disks for storage
-      rack  = "rack1",          // Rack location for this server
-      max   = 0                 // Maximum number of volumes to create on this server, or 0 for auto
+  }
+
+  volumes = {
+    "192.168.86.12" : {
+      "name" : "cm2",              // Unique name identifying the volume server
+      "data" : ["/mnt/clusterfs"], // Location of the volume data
+      "rack" : "rack1",            // Rack name where server is located
     }
-  ]
-  filers = [
-    {
-      ip = "192.168.86.11"
-    }, {
-      ip = "192.168.86.12"
-    }, {
-      ip = "192.168.86.13"
+    "192.168.86.13" : {
+      "name" : "cm3",              // Unique name identifying the volume server
+      "data" : ["/mnt/clusterfs"], // Location of the volume data
+      "rack" : "rack1",            // Rack name where server is located
     }
-  ]
+  }
+
+  filers = {
+    "192.168.86.13" : {
+      "name" : "cm3",               // Unique name identifying the filer server
+      "data" : "/var/lib/seaweedfs" // Persistent data
+      "collection" : "drobo",       // Store data in this collection
+      "rack" : "rack1",             // Preferred rack to write data in
+    }
+  }
 }
