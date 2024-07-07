@@ -145,7 +145,6 @@ Cluster filesystem, which can be spread across multiple nodes.
    * [Nomad Job](seaweedfs/nomad/seaweedfs.hcl)
 
 TODO:
-  * [ ] In progress
   * [ ] A lot of testing is needed
 
 ## semaphore
