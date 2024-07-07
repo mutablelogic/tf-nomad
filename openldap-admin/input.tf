@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "openldap-admin"
+  default     = "openldap-admin-http"
 }
 
 variable "service_dns" {
