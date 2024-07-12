@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "mongodb"
+  default     = "phtoprism"
 }
 
 variable "service_dns" {
@@ -40,28 +40,33 @@ variable "service_dns" {
   default     = []
 }
 
-variable "service_type" {
-  description = "Run as a service or system"
+variable "host" {
   type        = string
-  default     = "service"
-}
-
-variable "hosts" {
-  type        = list(string)
-  description = "List of hosts to deploy on. If empty, one allocation will be created"
-  default     = []
+  description = "Hosts to deploy on"
 }
 
 variable "port" {
   type        = number
   description = "Port to expose plaintext service"
-  default     = 27017
+  default     = 2342
 }
 
 variable "data" {
   type        = string
-  description = "Directory for data persistence"
+  description = "Directory for photoprism data persistence"
   default     = ""
+}
+
+variable "mariadb_data" {
+  type        = string
+  description = "Directory for mariadb data persistence"
+  default     = ""
+}
+
+variable "admin_user" {
+  description = "admin user"
+  type        = string
+  default = "admin"
 }
 
 variable "admin_password" {
@@ -69,11 +74,3 @@ variable "admin_password" {
   type        = string
   sensitive   = true
 }
-
-variable "replicaset_name" {
-  description = "replica set name"
-  type        = string
-  default    = "rs0"
-}
-
-
