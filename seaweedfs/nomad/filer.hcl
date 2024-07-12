@@ -248,7 +248,8 @@ job "seaweedfs-filer-${ name }" {
           "-logtostderr",
           "webdav",
           "-port=$${NOMAD_PORT_webdav}",
-          format("-filer=%s", local.filer)
+          format("-filer=%s", local.filer),
+          var.collection == "" ? "" : format("-collection=%s", var.collection),
         ])
         ports = [ "webdav" ]
       } // config
