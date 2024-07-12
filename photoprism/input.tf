@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "phtoprism"
+  default     = "photoprism"
 }
 
 variable "service_dns" {
@@ -51,10 +51,31 @@ variable "port" {
   default     = 2342
 }
 
-variable "data" {
+variable "url" {
+  description = "url for photoprism"
   type        = string
-  description = "Directory for photoprism data persistence"
   default     = ""
+}
+
+variable "data" {
+  description = "data volume for persistent data"
+  type        = string
+  default = "/var/lib/photoprism"
+}
+
+variable "import" {
+  description = "Path to import folder on local filesystem"
+  type = string
+}
+
+variable "originals" {
+  description = "Path to original photos on local filesystem"
+  type = string
+}
+
+variable "backup" {
+  description = "Path to backup folder for SQL metadata"
+  type = string
 }
 
 variable "mariadb_data" {

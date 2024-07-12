@@ -14,7 +14,11 @@ resource "nomad_job" "photoprism" {
       service_name       = var.service_name      
       host               = var.host
       port               = var.port
+      url               = var.url
       data               = var.data
+      import             = var.import
+      originals          = var.originals
+      backup             = var.backup
       mariadb_host       = var.host
       mariadb_data       = var.mariadb_data
       mariadb_password   = var.admin_password
