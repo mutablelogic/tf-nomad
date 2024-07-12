@@ -74,6 +74,12 @@ variable "metrics_port" {
   default     = 0
 }
 
+variable "webdav_port" {
+  description = "webdav port (use 0 to disable)"
+  type        = number
+  default     = 0
+}
+
 variable "rack" {
   description = "Prefer to write to volumes in this rack"
   type        = string
@@ -145,6 +151,16 @@ job "seaweedfs-filer-${ name }" {
           to     = var.metrics_port
         }
       }
+
+      // webdav port is only exposed if enabled
+      dynamic "port" {
+        for_each = var.webdav_port > 0 ? [1] : []
+        labels   = ["webdav"]
+        content {
+          static = var.webdav_port
+          to     = var.webdav_port
+        }
+      }      
     }
 
     service {
@@ -171,6 +187,16 @@ job "seaweedfs-filer-${ name }" {
       }
     }
 
+    dynamic "service" {
+      for_each = var.webdav_port > 0 ? [1] : []
+      content {
+        tags     = ["webdav", var.service_name,  local.service]
+        name     = format("%s-%s-webdav",  local.service,var.service_name)
+        port     = "webdav"
+        provider = var.service_provider
+      }
+    }    
+
     task "filer" {    
       driver = "docker"      
       config {
@@ -189,6 +215,8 @@ job "seaweedfs-filer-${ name }" {
           "-defaultStoreDir=/data",
           var.rack == "" ? "" : format("-rack=%s", var.rack),
           var.collection == "" ? "" : format("-collection=%s", var.collection),
+          var.webdav_port == 0 ? "" : "-webdav",
+          var.webdav_port == 0 ? "" : "-webdav.port=$${NOMAD_PORT_webdav}",
         ])
         volumes = compact([
           var.data == "" ? "" : format("%s:/data", var.data),
@@ -197,6 +225,7 @@ job "seaweedfs-filer-${ name }" {
           "http",
           "grpc",
           var.metrics_port > 0 ? "metrics" : "",
+          var.webdav_port > 0 ? "webdav" : "",
         ])
       } // config
     } // task "filer"

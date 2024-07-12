@@ -76,6 +76,7 @@ resource "nomad_job" "seaweedfs-filer" {
       port               = var.http_port_filer
       grpc_port          = var.grpc_port_filer == 0 ? var.http_port_filer + local.grpc_offset : var.grpc_port_filer
       metrics_port       = var.metrics ? var.metrics_port_filer : 0
+      webdav_port        = each.value.webdav ? var.webdav_port_filer : 0
       rack               = each.value.rack
       collection         = each.value.collection
     }

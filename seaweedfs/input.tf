@@ -71,6 +71,7 @@ variable "filers" {
     data       = optional(string) // Persisent data directory
     rack       = optional(string) // Preferred rack to write data in
     collection = optional(string) // Use this collection name
+    webdav     = optional(bool)   // Enable webdav
   }))
 }
 
@@ -134,4 +135,10 @@ variable "metrics_port_filer" {
   description = "Prometheus metrics port for filer servers"
   type        = number
   default     = 9092
+}
+
+variable "webdav_port_filer" {
+  description = "Webdav port for filer servers"
+  type        = number
+  default     = 7333
 }
