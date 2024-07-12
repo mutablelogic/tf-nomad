@@ -101,7 +101,7 @@ locals {
   // Service
   service = "filer"
   // Filter
-  filer = fomat("%s:%d.%d", var.ip, var.port, var.grpc_port == 0 ? var.port + local.grpc_offset : var.grpc_port)
+  filer = format("%s:%d.%d", var.ip, var.port, var.grpc_port == 0 ? var.port + local.grpc_offset : var.grpc_port)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
