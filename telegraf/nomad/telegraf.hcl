@@ -58,7 +58,7 @@ variable "inputs" {
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
-job "telegraf" {
+job "telegraf-${ name }" {
   type        = var.service_type
   datacenters = var.dc
   namespace   = var.namespace
@@ -91,9 +91,9 @@ job "telegraf" {
         destination = "local/config/global_tags.conf"
         data        = <<-EOF
         [global_tags]
-        dc = "${NOMAD_DC}"
-        namespace = "${NOMAD_NAMESPACE}"
-        region = "${NOMAD_REGION}"
+        dc = "$${NOMAD_DC}"
+        namespace = "$${NOMAD_NAMESPACE}"
+        region = "$${NOMAD_REGION}"
         EOF
       }
 
@@ -113,7 +113,7 @@ job "telegraf" {
         debug = false
         quiet = false
         logtarget = "stderr"
-        hostname = "${HOST_NAME}"
+        hostname = "$${HOST_NAME}"
         omit_hostname = false
         EOF
       }
@@ -122,12 +122,12 @@ job "telegraf" {
       dynamic "template" {
         for_each = var.outputs
         content {
-          destination     = "local/config/output_${template.key}.conf"
+          destination     = "local/config/output_$${template.key}.conf"
           left_delimiter  = "{{{"
           right_delimiter = "}}}"
           data            = <<-EOF
-          [[outputs.${template.key}]]
-          ${join("\n", [for k, v in template.value : "${k} = ${v}"])}
+          [[outputs.$${template.key}]]
+          $${join("\n", [for k, v in template.value : "$${k} = $${v}"])}
           EOF
         }
       }
@@ -136,10 +136,10 @@ job "telegraf" {
       dynamic "template" {
         for_each = var.inputs
         content {
-          destination = "local/config/input_${template.key}.conf"
+          destination = "local/config/input_$${template.key}.conf"
           data        = <<-EOF
-          [[inputs.${template.key}]]
-          ${join("\n", [for k, v in template.value : "${k} = ${v}"])}
+          [[inputs.$${template.key}]]
+          $${join("\n", [for k, v in template.value : "$${k} = $${v}"])}
           EOF
         }
       }

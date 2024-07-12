@@ -40,6 +40,12 @@ variable "hosts" {
   default     = []
 }
 
+variable "name" {
+  type        = string
+  description = "Job name"
+  default     = ""
+}
+
 variable "outputs" {
   description = "Outputs configuration"
   type        = map(map(string))
