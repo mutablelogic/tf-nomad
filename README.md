@@ -158,6 +158,16 @@ TODO:
 * [ ] Use volume instead when the data does not have '/' as prefix
 * [ ] Add users, databases and roles support on initialization
 
+
+## Photoprism
+
+Photoprism is a photo library hosting service. It uses it's own
+MariaDB database.
+
+* [Documentation](https://www.photoprism.app/)
+* [Terraform Example](_examples/photoprism.tf)
+* [Nomad Job](photoprism/nomad/photoprism.hcl)
+
 ## seaweedfs
 
 Cluster filesystem, which can be spread across multiple nodes.
