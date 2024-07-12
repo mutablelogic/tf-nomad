@@ -1,7 +1,9 @@
 
 resource "nomad_job" "telegraf" {
   count   = var.enabled ? 1 : 0
-  jobspec = file("${path.module}/nomad/telegraf.hcl")
+  jobspec = templatefile("${path.module}/nomad/telegraf.hcl", {
+    name = var.name
+  })  
 
   hcl2 {
     vars = {
