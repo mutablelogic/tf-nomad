@@ -121,7 +121,7 @@ variable "duckdns_api_key" {
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
-job "nginx-ssl" {
+job "nginx" {
   type        = "service"
   datacenters = var.dc
   namespace   = var.namespace
