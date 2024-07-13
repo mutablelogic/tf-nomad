@@ -98,3 +98,9 @@ variable "cloudflare_api_key" {
   type        = string
   default     = ""
 }
+
+variable "staging" {
+  description = "Use let's encrypt staging environment"
+  type        = bool
+  default     = false
+}

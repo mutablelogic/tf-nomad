@@ -94,6 +94,12 @@ variable "subdomains" {
   type        = list(string)
 }
 
+variable "staging" {
+  description = "Use staging environment"
+  type        = bool
+  default     = false
+}
+
 variable "dns_validation" {
   description = "DNS validation type (http, cloudflare, duckdns)"
   type        = string
@@ -214,8 +220,8 @@ job "nginx-ssl" {
       }
 
       env {
-        PUID         = 1000
-        PGID         = 1000
+        PUID         = 100 # maps to user nginx
+        PGID         = 100 # maps to group nginx
         TZ           = var.timezone
         URL          = var.zone
         EMAIL        = var.email
@@ -223,6 +229,7 @@ job "nginx-ssl" {
         SUBDOMAINS   = length(var.subdomains) == 0 ? "wildcard" : join(",", var.subdomains)
         VALIDATION   = var.dns_validation == "http" ? "http" : "dns"
         DNSPLUGIN    = var.dns_validation == "http" ? "" : var.dns_validation
+        STAGING      = var.staging ? "true" : "false"
       }
 
       config {

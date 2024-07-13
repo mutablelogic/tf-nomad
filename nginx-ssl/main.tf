@@ -18,8 +18,8 @@ resource "nomad_job" "nginx-ssl" {
       ports              = jsonencode(var.ports)
       configs = jsonencode({
         "nginx.conf"     = chomp(file("${path.module}/config/nginx.conf"))
-        "mimetypes.conf" = chomp(file("${path.module}/config/mimetypes.conf"))
         "ssl.conf"       = chomp(file("${path.module}/config/ssl.conf"))
+        "mimetypes.conf" = chomp(file("${path.module}/config/mimetypes.conf"))
         "fastcgi.conf"   = chomp(file("${path.module}/config/fastcgi.conf"))
         "http.conf"      = chomp(file("${path.module}/config/http.conf"))
       })
@@ -30,6 +30,7 @@ resource "nomad_job" "nginx-ssl" {
       subdomains         = jsonencode(var.subdomains)
       dns_validation     = var.dns_validation
       cloudflare_api_key = var.cloudflare_api_key
+      staging            = var.staging
     }
   }
 }
