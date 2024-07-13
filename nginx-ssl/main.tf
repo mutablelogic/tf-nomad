@@ -21,6 +21,7 @@ resource "nomad_job" "nginx-ssl" {
         "mimetypes.conf" = chomp(file("${path.module}/config/mimetypes.conf"))
         "ssl.conf"       = chomp(file("${path.module}/config/ssl.conf"))
         "fastcgi.conf"   = chomp(file("${path.module}/config/fastcgi.conf"))
+        "http.conf"      = chomp(file("${path.module}/config/http.conf"))
       })
       servers            = jsonencode(var.servers)
       timezone           = var.timezone

@@ -208,7 +208,7 @@ job "nginx-ssl" {
       dynamic "template" {
         for_each = var.servers
         content {
-          destination = format("${NOMAD_TASK_DIR}/nginx/conf.d/%s.conf", template.key)
+          destination = format("${NOMAD_TASK_DIR}/nginx/conf.d/%s", template.key)
           data        = template.value
         }
       }
