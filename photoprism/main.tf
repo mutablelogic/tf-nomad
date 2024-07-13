@@ -19,7 +19,6 @@ resource "nomad_job" "photoprism" {
       import             = var.import
       originals          = var.originals
       backup             = var.backup
-      mariadb_host       = var.host
       mariadb_data       = var.mariadb_data
       mariadb_password   = var.admin_password
       mariadb_root_password = var.admin_password
