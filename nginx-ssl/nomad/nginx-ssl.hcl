@@ -100,6 +100,12 @@ variable "staging" {
   default     = false
 }
 
+variable "propagation" {
+  description = "DNS propagation time"
+  type        = string
+  default     = ""
+}
+
 variable "dns_validation" {
   description = "DNS validation type (http, cloudflare, duckdns)"
   type        = string
@@ -230,6 +236,7 @@ job "nginx" {
         VALIDATION   = var.dns_validation == "http" ? "http" : "dns"
         DNSPLUGIN    = var.dns_validation == "http" ? "" : var.dns_validation
         STAGING      = var.staging ? "true" : "false"
+        PROPAGATION  = var.propagation
       }
 
       config {

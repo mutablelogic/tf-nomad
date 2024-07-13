@@ -32,6 +32,7 @@ resource "nomad_job" "nginx-ssl" {
       dns_validation     = var.dns_validation
       cloudflare_api_key = var.cloudflare_api_key
       staging            = var.staging
+      propagation        = var.propagation
     }
   }
 }
