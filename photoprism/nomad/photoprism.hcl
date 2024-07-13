@@ -170,7 +170,7 @@ job "photoprism" {
       }
     }
 
-    service {
+    /*service {
       tags     = ["photoprism", "mysql", "mariadb"]
       name     = format("%s-mysql", var.service_name)
       port     = "mysql"
@@ -182,7 +182,7 @@ job "photoprism" {
       name     = format("%s-http", var.service_name)
       port     = "photoprism"
       provider = var.service_provider
-    }
+    }*/
 
     task "mariadb" {
       driver = "docker"
