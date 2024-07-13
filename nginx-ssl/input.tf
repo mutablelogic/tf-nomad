@@ -104,3 +104,9 @@ variable "staging" {
   type        = bool
   default     = false
 }
+
+variable "propagation" {
+  description = "DNS propagation time"
+  type        = string
+  default     = ""
+}
