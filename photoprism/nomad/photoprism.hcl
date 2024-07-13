@@ -161,11 +161,9 @@ job "photoprism" {
     network {
       port "photoprism" {
         static = var.port
-        to     = var.port
+        to     = 2342
       }
-    }
 
-    network {
       port "mysql" {
         static = var.mariadb_port
         to     = 3306
