@@ -170,22 +170,15 @@ job "photoprism" {
       }
     }
 
-    /*service {
-      tags     = ["photoprism", "mysql", "mariadb"]
-      name     = format("%s-mysql", var.service_name)
-      port     = "mysql"
-      provider = var.service_provider
-    }
-
-    service {
-      tags     = ["photoprism", "http"]
-      name     = format("%s-http", var.service_name)
-      port     = "photoprism"
-      provider = var.service_provider
-    }*/
-
     task "mariadb" {
       driver = "docker"
+
+      service {
+        tags     = ["mysql", "mariadb"]
+        name     = format("%s-mysql", var.service_name)
+        port     = "mysql"
+        provider = var.service_provider
+      }
 
       env {
         MARIADB_AUTO_UPGRADE       = "1"
@@ -209,6 +202,13 @@ job "photoprism" {
 
     task "photoprism" {
       driver = "docker"
+
+      service {
+        tags     = ["photoprism", "http"]
+        name     = format("%s-http", var.service_name)
+        port     = "photoprism"
+        provider = var.service_provider
+      }
 
       env {
         PHOTOPRISM_ADMIN_USER             = var.admin_user       # admin login username
@@ -240,7 +240,7 @@ job "photoprism" {
         PHOTOPRISM_DETECT_NSFW            = "false"              # automatically flags photos as private that MAY be offensive (requires TensorFlow)
         PHOTOPRISM_UPLOAD_NSFW            = "true"               # allows uploads that MAY be offensive (no effect without TensorFlow)
         PHOTOPRISM_DATABASE_DRIVER        = "mysql"              # MariaDB 10.5.12+ (MySQL successor) offers significantly better performance compared to SQLite
-        PHOTOPRISM_DATABASE_SERVER        = NOMAD_ADDR_mariadb   # MariaDB database server (hostname:port)
+        PHOTOPRISM_DATABASE_SERVER        = NOMAD_ADDR_mysql     # MariaDB database server (hostname:port)
         PHOTOPRISM_DATABASE_NAME          = var.mariadb_database # MariaDB database schema name
         PHOTOPRISM_DATABASE_USER          = var.mariadb_user     # MariaDB database user name
         PHOTOPRISM_DATABASE_PASSWORD      = var.mariadb_password # MariaDB database user password
