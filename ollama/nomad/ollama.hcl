@@ -215,7 +215,7 @@ job "ollama" {
         force_pull  = var.docker_always_pull
         ports       = ["http"]
         dns_servers = var.service_dns
-        volumes     = local.volumes
+        volumes     = local.volumes_webui
       }
     } // task "server"
   }   // group "ollama-webui"  
