@@ -112,6 +112,21 @@ TODO:
 * [ ] Add TLS certificate support
 * [ ] Not sure how we can integrate with nomad services
 
+
+## Ollama
+
+Ollama LLM service, with the Open WebUI.
+
+* [Ollama](https://ollama.com/)
+* [Open WebUI](https://docs.openwebui.com/)
+* [Terraform Example](_examples/ollama.tf)
+* [Nomad Job](ollama/nomad/ollama.hcl)
+
+TODO:
+
+* [ ] Add multiple AI service keys and hosts
+* [ ] Potentiallty don't call Ollama like this from the Web UI, if there is more than one host
+
 ## OpenLDAP
 
 OpenLDAP server, which can be placed on several nodes
