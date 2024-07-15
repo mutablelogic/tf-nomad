@@ -8,7 +8,6 @@ resource "nomad_job" "nginx-ssl" {
     vars = {
       dc                 = jsonencode([var.dc])
       namespace          = var.namespace
-      hosts              = jsonencode(var.hosts)
       docker_image       = local.docker_image
       docker_always_pull = jsonencode(local.docker_always_pull)
       service_provider   = var.service_provider
