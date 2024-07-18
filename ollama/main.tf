@@ -9,6 +9,7 @@ resource "nomad_job" "ollama" {
       dc                 = jsonencode(var.dc)
       namespace          = var.namespace
       docker_image       = local.docker_image
+      docker_runtime     = var.docker_runtime
       docker_image_webui = local.docker_image_webui
       docker_always_pull = jsonencode(local.docker_always_pull)
       service_provider   = var.service_provider
