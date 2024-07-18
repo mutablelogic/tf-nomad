@@ -43,6 +43,12 @@ variable "docker_tag" {
   default     = "latest"
 }
 
+variable "docker_runtime" {
+  description = "Docker runtime"
+  type        = string
+  default     = ""
+}
+
 variable "docker_tag_webui" {
   type        = string
   description = "Version of the docker image to use for webui, set to empty string to disable"
