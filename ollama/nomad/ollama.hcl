@@ -176,7 +176,10 @@ job "ollama" {
         devices     = local.devices
       }
 
-    } // task "server"
+      resources {
+        cpu    = 100
+        memory = 2048
+      } // task "server"
   }   // group "ollama"
 
 
