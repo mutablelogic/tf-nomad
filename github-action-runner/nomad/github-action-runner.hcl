@@ -163,7 +163,7 @@ job "github-action-runner" {
                  --work "${local.DATA}" \
                  --name "${local.NAME}" \
                  --runnergroup "${var.group}" \
-                 --labels "${local.LABELS}" \
+                 --labels "${local.LABELS}, ${node.unique.name}" \
                  --url "https://github.com/${var.organization}" \
                  --token $(head ${local.TOKEN_PATH}) \
                  --unattended \
