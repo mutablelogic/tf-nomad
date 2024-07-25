@@ -119,6 +119,10 @@ job "github-action-runner" {
       }
     }
 
+    constraint {
+      distinct_hosts = true
+    }
+
     // auth task runs to obtain a runner token
     task "auth" {
       driver = "docker"
