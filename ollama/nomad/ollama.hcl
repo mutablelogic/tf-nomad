@@ -168,7 +168,7 @@ job "ollama" {
 
       config {
         image       = var.docker_image
-        runtime     = var.docker_runtime 
+        runtime     = var.docker_runtime
         force_pull  = var.docker_always_pull
         ports       = ["http"]
         dns_servers = var.service_dns
@@ -176,6 +176,10 @@ job "ollama" {
         devices     = local.devices
       }
 
+      resources {
+        cpu    = 100
+        memory = 2048
+      }
     } // task "server"
   }   // group "ollama"
 

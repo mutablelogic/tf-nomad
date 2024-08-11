@@ -18,8 +18,8 @@ variable "enabled" {
 
 variable "docker_tag" {
   type        = string
-  description = "Version of the docker image to use, defaults to latest-pg16"
-  default     = "latest-pg16"
+  description = "Version of the docker image to use, defaults to pg16"
+  default     = "pg16"
 }
 
 variable "service_provider" {
