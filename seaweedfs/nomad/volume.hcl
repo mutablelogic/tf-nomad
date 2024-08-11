@@ -176,6 +176,13 @@ job "seaweedfs-volume-${ name }" {
 
     task "volume" {    
       driver = "docker"
+
+      // Reserve 1024MB of memory
+      resources {
+        memory = 1024
+        memory_max = 2048
+      }      
+
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
