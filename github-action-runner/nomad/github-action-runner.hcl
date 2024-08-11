@@ -119,6 +119,11 @@ job "github-action-runner" {
       }
     }
 
+    constraint {
+      operator = "distinct_hosts"
+      value    = "true"
+    }
+
     // auth task runs to obtain a runner token
     task "auth" {
       driver = "docker"
@@ -154,7 +159,7 @@ job "github-action-runner" {
         userns_mode = "host"
         volumes = [
           "/var/run/docker.sock:/var/run/docker.sock",
-        ]        
+        ]
         args = [
           "sh",
           "-c",

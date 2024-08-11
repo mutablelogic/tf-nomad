@@ -157,6 +157,11 @@ job "grafana" {
       }
     }
 
+    constraint {
+      operator = "distinct_hosts"
+      value    = "true"
+    }
+
     network {
       port "http" {
         static = var.port
@@ -174,7 +179,7 @@ job "grafana" {
     ephemeral_disk {
       migrate = true
     }
-
+    /*
     task "init" {
       driver = "raw_exec"
 
@@ -192,6 +197,7 @@ job "grafana" {
         ])
       }
     } // task "init"
+*/
 
     task "daemon" {
       driver = "docker"
