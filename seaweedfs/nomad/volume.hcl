@@ -177,10 +177,11 @@ job "seaweedfs-volume-${ name }" {
     task "volume" {    
       driver = "docker"
 
-      // Reserve 1024MB of memory
+      // Reserve 2GB of memory
       resources {
-        memory = 1024
-        memory_max = 2048
+        cpu        = 512
+        memory     = 2048
+        memory_max = 4096
       }      
 
       config {
