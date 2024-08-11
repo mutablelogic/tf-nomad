@@ -142,6 +142,12 @@ job "emby" {
     task "emby" {
       driver = "docker"
 
+      // Reserve 1024MB of memory
+      resources {
+        memory = 1024
+        memory_max = 2048
+      }
+
       env {
         PUID    = "999"
         PGID    = "995"
