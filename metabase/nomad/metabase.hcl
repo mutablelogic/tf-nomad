@@ -134,10 +134,10 @@ job "metabase" {
     task "metabase" {
       driver = "docker"
 
-      // Reserve 1024MB of memory
+      // Reserve 2GB/4GB of memory
       resources {
-        memory = 1024
-        memory_max = 2048
+        memory = 2048
+        memory_max = 4096
       }
 
       env {
