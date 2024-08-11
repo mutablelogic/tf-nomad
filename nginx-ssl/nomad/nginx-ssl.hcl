@@ -176,6 +176,12 @@ job "nginx" {
     task "server" {
       driver = "docker"
 
+      // Reserve 512MB of memory
+      resources {
+        memory = 512
+        memory_max = 1024
+      }
+
       meta {
         task_dir           = NOMAD_TASK_DIR
         alloc_dir          = NOMAD_ALLOC_DIR

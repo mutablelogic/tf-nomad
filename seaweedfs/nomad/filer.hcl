@@ -180,6 +180,13 @@ job "seaweedfs-filer-${ name }" {
     }
 
     task "filer" {    
+
+      // Reserve 512MB of memory
+      resources {
+        memory = 512
+        memory_max = 1024
+      }      
+
       driver = "docker"      
       config {
         image       = var.docker_image

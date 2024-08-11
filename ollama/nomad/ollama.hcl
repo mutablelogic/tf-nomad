@@ -215,6 +215,12 @@ job "ollama" {
     task "server" {
       driver = "docker"
 
+      // Reserve 512MB of memory
+      resources {
+        memory = 512
+        memory_max = 1024
+      }
+
       env {
         OLLAMA_BASE_URL      = local.ollama_service
         OPENAI_API_KEYS      = var.openai_api_key
