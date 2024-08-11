@@ -134,6 +134,12 @@ job "metabase" {
     task "metabase" {
       driver = "docker"
 
+      // Reserve 1024MB of memory
+      resources {
+        memory = 1024
+        memory_max = 2048
+      }
+
       env {
         MB_DB_TYPE   = var.db.type
         MB_DB_DBNAME = var.db.name == null ? "" : var.db.name
