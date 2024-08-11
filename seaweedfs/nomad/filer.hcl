@@ -188,7 +188,7 @@ job "seaweedfs-filer-${ name }" {
         args = compact([
           "-logtostderr",
           "filer",
-          "-ip=$${node.unique.name}",
+          "-ip=$${attr.unique.network.ip-address}",
           "-ip.bind=0.0.0.0",
           "-port=$${NOMAD_PORT_http}",
           "-port.grpc=$${NOMAD_PORT_grpc}",
