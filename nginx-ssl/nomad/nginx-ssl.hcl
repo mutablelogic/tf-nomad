@@ -241,7 +241,7 @@ job "nginx" {
       }
 
       env {
-        PUID         = 100 # maps to user nginx
+        PUID         = 101 # maps to user nginx
         PGID         = 100 # maps to group nginx
         TZ           = var.timezone
         URL          = var.zone
