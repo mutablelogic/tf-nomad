@@ -152,6 +152,11 @@ job "nginx" {
       }
     }
 
+    constraint {
+      operator = "distinct_hosts"
+      value    = "true"
+    }
+
     network {
       dynamic "port" {
         for_each = var.ports
@@ -171,6 +176,10 @@ job "nginx" {
         port     = service.key
         provider = var.service_provider
       }
+    }
+
+    ephemeral_disk {
+      migrate = true
     }
 
     task "server" {
