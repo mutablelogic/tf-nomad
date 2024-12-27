@@ -72,6 +72,7 @@ variable "filers" {
     rack       = optional(string) // Preferred rack to write data in
     collection = optional(string) // Use this collection name
     webdav     = optional(bool)   // Enable webdav
+    s3         = optional(bool)   // Enable S3
   }))
 }
 
@@ -141,4 +142,10 @@ variable "webdav_port_filer" {
   description = "Webdav port for filer servers"
   type        = number
   default     = 7333
+}
+
+variable "s3_port_filer" {
+  description = "S3 port for filer servers"
+  type        = number
+  default     = 8333
 }
