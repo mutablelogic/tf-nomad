@@ -32,10 +32,11 @@ module "seaweedfs" {
 
   filers = {
     "192.168.86.13" : {
-      "name" : "cm3",               // Unique name identifying the filer server
-      "data" : "/var/lib/seaweedfs" // Persistent data
-      "collection" : "drobo",       // Store data in this collection
-      "rack" : "rack1",             // Preferred rack to write data in
+      "name"       : "cm3",               // Unique name identifying the filer server
+      "data"       : "/var/lib/seaweedfs" // Persistent data
+      "collection" : "drobo",             // Store data in this collection
+      "rack"       : "rack1",             // Preferred rack to write data in
+      "s3"         : true,                // Enable S3
     }
   }
 }
