@@ -219,6 +219,53 @@ job "seaweedfs-filer-${ name }" {
 
   ///////////////////////////////////////////////////////////////////////////////
 
+  group "s3" {
+    count = var.s3_port > 0 ? 1 : 0
+
+    constraint {
+      attribute = var.ip
+      operator  = "set_contains"
+      value     = "$${attr.unique.network.ip-address}"
+    }
+
+
+    network {
+      mode = "host"
+
+      // s3 port is only exposed if enabled
+      port "s3" {
+        static = var.s3_port
+        to     = var.s3_port
+      }
+    }
+
+    service {
+      tags     = ["s3", var.service_name,  local.service]
+      name     = format("%s-%s-s3",  local.service, var.service_name)
+      port     = "s3"
+      provider = var.service_provider
+    }    
+
+    task "s3" {    
+      driver = "docker"      
+      config {
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        dns_servers = var.service_dns
+        args = compact([
+          "-logtostderr",
+          "s3",
+          "-port=$${NOMAD_PORT_s3}",
+          format("-filer=%s", local.filer),
+          var.collection == "" ? "" : format("-collection=%s", var.collection),
+        ])
+        ports = [ "s3" ]
+      } // config
+    } // task "s3"
+  }  // group "s3"
+
+  ///////////////////////////////////////////////////////////////////////////////
+
   group "webdav" {
     count = var.webdav_port > 0 ? 1 : 0
 
