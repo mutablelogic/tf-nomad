@@ -263,7 +263,6 @@ job "seaweedfs-filer-${ name }" {
           "s3",
           "-port=$${NOMAD_PORT_s3}",
           format("-filer=%s", local.filer),
-          var.collection == "" ? "" : format("-collection=%s", var.collection),
         ])
         ports = [ "s3" ]
       } // config
