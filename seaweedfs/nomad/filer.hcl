@@ -263,6 +263,7 @@ job "seaweedfs-filer-${ name }" {
           "s3",
           "-port=$${NOMAD_PORT_s3}",
           format("-filer=%s", local.filer),
+          "-ip.bind=0.0.0.0",
         ])
         ports = [ "s3" ]
       } // config
