@@ -80,6 +80,12 @@ variable "webdav_port" {
   default     = 0
 }
 
+variable "s3_port" {
+  description = "s3 port (use 0 to disable)"
+  type        = number
+  default     = 0
+}
+
 variable "rack" {
   description = "Prefer to write to volumes in this rack"
   type        = string
