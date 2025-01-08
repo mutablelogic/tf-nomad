@@ -136,8 +136,8 @@ job "metabase" {
 
       // Reserve 2GB/4GB of memory
       resources {
-        memory = 2048
-        memory_max = 4096
+        memory = 1024
+        memory_max = 2048
       }
 
       env {
