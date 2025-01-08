@@ -183,7 +183,7 @@ job "seaweedfs-volume-${ name }" {
       // Reserve 2GB of memory
       resources {
         cpu        = 512
-        memory     = 2048
+        memory     = 3072
         memory_max = 4096
       }      
 
