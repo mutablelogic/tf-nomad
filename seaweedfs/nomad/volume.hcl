@@ -97,6 +97,9 @@ locals {
   data_dir    = compact([for i, v in var.data : format("/data%s", i)])
   data_volume = compact([for i, v in var.data : v == "" ? "" : format("%s:/data%s", v, i)])
   data_max    = compact([for i in var.data : 0])
+
+  // Index type
+  indextype   = "leveldb"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -198,6 +201,7 @@ job "seaweedfs-volume-${ name }" {
           format("-mserver=%s", join(",", var.masters)),
           format("-dir=%s", join(",", local.data_dir)),
           format("-max=%s", join(",", local.data_max)),
+          format("-index=%s", local.indextype),
           var.metrics_port == 0 ? "" : "-metricsPort=$${NOMAD_PORT_metrics}",
           "-dataCenter=$${NOMAD_DC}",
           "-rack=$${var.rack}",
