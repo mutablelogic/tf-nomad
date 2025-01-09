@@ -44,7 +44,7 @@ resource "nomad_job" "seaweedfs-volume" {
       docker_always_pull = local.docker_always_pull
       ip                 = each.key
       masters            = jsonencode(local.master_peers)
-      data               = jsonencode(each.value.data)
+      data               = each.value.data
       port               = var.http_port_volume
       grpc_port          = var.grpc_port_volume == 0 ? var.http_port_volume + local.grpc_offset : var.grpc_port_volume
       metrics_port       = var.metrics ? var.metrics_port_volume : 0
@@ -72,7 +72,7 @@ resource "nomad_job" "seaweedfs-filer" {
       docker_always_pull = local.docker_always_pull
       ip                 = each.key
       masters            = jsonencode(local.master_peers)
-      data               = jsonencode(each.value.data)
+      data               = each.value.data
       port               = var.http_port_filer
       grpc_port          = var.grpc_port_filer == 0 ? var.http_port_filer + local.grpc_offset : var.grpc_port_filer
       metrics_port       = var.metrics ? var.metrics_port_filer : 0
