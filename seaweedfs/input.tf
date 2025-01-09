@@ -50,7 +50,7 @@ variable "masters" {
   description = "Master servers"
   type = map(object({
     name = string           // Name for the nomad job
-    data = optional(string) // Persisent data directories
+    data = string           // Persisent data directories
   }))
 }
 
@@ -68,7 +68,7 @@ variable "filers" {
   description = "Filer servers"
   type = map(object({
     name       = string           // Name for the nomad job
-    data       = optional(string) // Persisent data directory
+    data       = string           // Persisent data directory
     rack       = optional(string) // Preferred rack to write data in
     collection = optional(string) // Use this collection name
     webdav     = optional(bool)   // Enable webdav

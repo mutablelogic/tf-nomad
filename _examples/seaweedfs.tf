@@ -37,6 +37,7 @@ module "seaweedfs" {
       "collection" : "drobo",             // Store data in this collection
       "rack"       : "rack1",             // Preferred rack to write data in
       "s3"         : true,                // Enable S3
+      "webdav"     : true,                // Enable WebDAV
     }
   }
 }
