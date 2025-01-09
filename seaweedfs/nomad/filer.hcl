@@ -187,10 +187,10 @@ job "seaweedfs-filer-${ name }" {
 
     task "filer" {    
 
-      // Reserve 1GB of memory
+      // Reserve 2GB of memory
       resources {
-        memory = 1024
-        memory_max = 2048
+        memory = 2048
+        memory_max = 3072
       }      
 
       driver = "docker"      
