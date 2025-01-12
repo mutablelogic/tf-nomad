@@ -141,6 +141,12 @@ job "postgresql" {
     task "server" {
       driver = "docker"
 
+      // Reserve 2GB/4GB of memory
+      resources {
+        memory = 2048
+        memory_max = 4096
+      }
+
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
