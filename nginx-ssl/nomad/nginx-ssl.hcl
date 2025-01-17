@@ -94,6 +94,11 @@ variable "subdomains" {
   type        = list(string)
 }
 
+variable "extra_domains" {
+  description = "Additional fully qualified domain names"
+  type        = list(string)
+}
+
 variable "staging" {
   description = "Use staging environment"
   type        = bool
@@ -187,7 +192,7 @@ job "nginx" {
 
       // Reserve 512MB of memory
       resources {
-        memory = 512
+        memory     = 512
         memory_max = 1024
       }
 
@@ -241,17 +246,18 @@ job "nginx" {
       }
 
       env {
-        PUID         = 101 # maps to user nginx
-        PGID         = 100 # maps to group nginx
-        TZ           = var.timezone
-        URL          = var.zone
-        EMAIL        = var.email
-        CERTPROVIDER = "letsencrypt"
-        SUBDOMAINS   = length(var.subdomains) == 0 ? "wildcard" : join(",", var.subdomains)
-        VALIDATION   = var.dns_validation == "http" ? "http" : "dns"
-        DNSPLUGIN    = var.dns_validation == "http" ? "" : var.dns_validation
-        STAGING      = var.staging ? "true" : "false"
-        PROPAGATION  = var.propagation
+        PUID          = 101 # maps to user nginx
+        PGID          = 100 # maps to group nginx
+        TZ            = var.timezone
+        URL           = var.zone
+        EMAIL         = var.email
+        CERTPROVIDER  = "letsencrypt"
+        SUBDOMAINS    = length(var.subdomains) == 0 ? "wildcard" : join(",", var.subdomains)
+        EXTRA_DOMAINS = join(",", var.extra_domains)
+        VALIDATION    = var.dns_validation == "http" ? "http" : "dns"
+        DNSPLUGIN     = var.dns_validation == "http" ? "" : var.dns_validation
+        STAGING       = var.staging ? "true" : "false"
+        PROPAGATION   = var.propagation
       }
 
       config {
