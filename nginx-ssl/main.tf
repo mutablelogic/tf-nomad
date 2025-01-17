@@ -28,6 +28,7 @@ resource "nomad_job" "nginx-ssl" {
       zone               = var.zone
       email              = var.email
       subdomains         = jsonencode(var.subdomains)
+      extra_domains      = jsonencode(var.extra_domains)
       dns_validation     = var.dns_validation
       cloudflare_api_key = var.cloudflare_api_key
       staging            = var.staging

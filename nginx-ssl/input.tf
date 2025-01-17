@@ -87,6 +87,12 @@ variable "subdomains" {
   default     = []
 }
 
+variable "extra_domains" {
+  description = "Additional fully qualified domain names"
+  type        = list(string)
+  default     = []
+}
+
 variable "dns_validation" {
   description = "DNS validation type (http, cloudflare, duckdns)"
   type        = string
