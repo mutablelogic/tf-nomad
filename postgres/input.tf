@@ -18,8 +18,8 @@ variable "enabled" {
 
 variable "docker_tag" {
   type        = string
-  description = "Version of the docker image to use, defaults to pg16"
-  default     = "pg16"
+  description = "Version of the docker image to use, defaults to 17-bookworm"
+  default     = "17-bookworm"
 }
 
 variable "service_provider" {
@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "postgresql"
+  default     = "postgres"
 }
 
 variable "service_dns" {
@@ -40,22 +40,27 @@ variable "service_dns" {
   default     = []
 }
 
-variable "service_type" {
-  description = "Run as a service or system"
+variable "primary" {
   type        = string
-  default     = "service"
+  description = "Host to deploy the primary database on"
 }
 
-variable "hosts" {
+variable "replicas" {
   type        = list(string)
-  description = "List of hosts to deploy on, if not specified deploys to one node"
+  description = "Hosts to deploy read-only replica databases on"
   default     = []
 }
 
 variable "port" {
   type        = number
-  description = "Port to expose service"
+  description = "Port to expose service for each database"
   default     = 5432
+}
+
+variable "database" {
+  description = "Default database name"
+  type        = string
+  default     = "postgres"
 }
 
 variable "data" {
@@ -65,7 +70,7 @@ variable "data" {
 }
 
 variable "root_user" {
-  description = "root user"
+  description = "root user name"
   type        = string
   default     = "postgres"
 }
@@ -76,7 +81,14 @@ variable "root_password" {
   sensitive   = true
 }
 
-variable "database" {
-  description = "Default database"
+variable "replication_user" {
+  description = "replication user name"
   type        = string
+  default     = "replicator"
+}
+
+variable "replication_password" {
+  description = "replication password (required)"
+  type        = string
+  sensitive   = true
 }

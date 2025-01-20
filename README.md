@@ -112,7 +112,6 @@ TODO:
 * [ ] Add TLS certificate support
 * [ ] Not sure how we can integrate with nomad services
 
-
 ## Ollama
 
 Ollama LLM service, with the Open WebUI.
@@ -139,9 +138,8 @@ TODO:
 
 * [ ] In progress
 * [ ] Add TLS support
-* [ ] Add replication support 
+* [ ] Add replication support
 * [ ] Add custom schema support
-
 
 ## OpenLDAP Administation
 
@@ -162,17 +160,15 @@ TODO:
 PostgreSQL is a database server
 
 * [Documentation](https://www.postgresql.org/)
-* [Terraform Example](_examples/postgresql.tf)
-* [Nomad Job](postgresql/nomad/postgresql.hcl)
+* [Terraform Example](_examples/postgres.tf)
+* [Nomad Job](postgres/nomad/postgres.hcl)
 
 TODO:
 
 * [ ] LDAP integration
 * [ ] Add TLS support
-* [ ] Add replication support
 * [ ] Use volume instead when the data does not have '/' as prefix
 * [ ] Add users, databases and roles support on initialization
-
 
 ## Photoprism
 
