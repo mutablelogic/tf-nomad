@@ -105,8 +105,8 @@ variable "replication_password" {
 // LOCALS
 
 locals {
-  data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data/pgdata"
-  replication_slots = [ for host in var.replicas : format("replica_%s", host) ]
+  data_path         = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data/pgdata"
+  replication_slots = [for host in var.replicas : format("replica_%s", host)]
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,7 +147,7 @@ job "postgres" {
     }
 
     ephemeral_disk {
-      migrate = true
+      migrate = false
     }
 
     task "server" {
@@ -160,7 +160,7 @@ job "postgres" {
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
-        ports       = [ "postgres" ]
+        ports       = ["postgres"]
         dns_servers = var.service_dns
         volumes = compact([
           var.data == "" ? "" : format("%s:/var/lib/postgresql/data", var.data)
@@ -168,13 +168,13 @@ job "postgres" {
       }
 
       env {
-        POSTGRES_USER     = var.root_user
-        POSTGRES_PASSWORD = var.root_password
-        POSTGRES_DB       = var.database
-        PGDATA            = local.data_path
-        POSTGRES_REPLICATION_USER = var.replication_user
+        POSTGRES_USER                 = var.root_user
+        POSTGRES_PASSWORD             = var.root_password
+        POSTGRES_DB                   = var.database
+        PGDATA                        = local.data_path
+        POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
-        POSTGRES_REPLICATION_SLOT = join(",",local.replication_slots)
+        POSTGRES_REPLICATION_SLOT     = join(",", local.replication_slots)
       }
     }
   }
@@ -186,14 +186,14 @@ job "postgres" {
     count = length(var.replicas)
 
     constraint {
-        attribute = node.unique.name
-        operator  = "set_contains_any"
-        value     = join(",",var.replicas)
+      attribute = node.unique.name
+      operator  = "set_contains_any"
+      value     = join(",", var.replicas)
     }
 
     constraint {
-      operator  = "distinct_hosts"
-      value     = "true"
+      operator = "distinct_hosts"
+      value    = "true"
     }
 
     network {
@@ -204,7 +204,7 @@ job "postgres" {
     }
 
     service {
-      tags     = [ "postgres", "replica" ]
+      tags     = ["postgres", "replica"]
       name     = format("%s-replica", var.service_name)
       port     = "postgres"
       provider = var.service_provider
@@ -214,11 +214,41 @@ job "postgres" {
       migrate = false
     }
 
+    task "wait-for-primary" {
+      lifecycle {
+        hook    = "prestart"
+        sidecar = false
+      }
+
+      meta {
+        primary_service_name = format("%s-primary", var.service_name)
+      }
+
+      template {
+        data        = <<-EOH
+          {{ $primary_service_name := env "NOMAD_META_primary_service_name" }}
+          {{ range nomadService $primary_service_name -}}
+          POSTGRES_REPLICATION_PRIMARY="host={{ .Address }} port={{ .Port }}"
+          {{ end }}
+        EOH
+        destination = "tmp/config.env"
+        env         = true
+      }
+
+      driver = "docker"
+      config {
+        image      = var.docker_image
+        force_pull = var.docker_always_pull
+        command    = "pg_isready"
+        args       = ["-d", "${POSTGRES_REPLICATION_PRIMARY}", "-t", "60"]
+      }
+    }
+
     task "server" {
       driver = "docker"
 
       resources {
-        memory = 1024
+        memory = 512
       }
 
       config {
@@ -236,13 +266,13 @@ job "postgres" {
       }
 
       template {
-        data = <<-EOH
+        data        = <<-EOH
           {{ $primary_service_name := env "NOMAD_META_primary_service_name" }}
           {{ range nomadService $primary_service_name -}}
           POSTGRES_REPLICATION_PRIMARY="host={{ .Address }} port={{ .Port }}"
           {{ end }}
         EOH
-        destination = "secrets/config.env"
+        destination = "tmp/config.env"
         env         = true
       }
 
@@ -256,5 +286,5 @@ job "postgres" {
         POSTGRES_REPLICATION_SLOT     = format("replica_%s", node.unique.name)
       }
     } // task
-  }  // group
-} // job 
+  }   // group
+}     // job 
