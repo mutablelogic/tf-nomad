@@ -46,7 +46,7 @@ variable "primary" {
 }
 
 variable "replicas" {
-  type        = string
+  type        = list(string)
   description = "Hosts to deploy read-only replica databases on"
   default     = []
 }

@@ -129,8 +129,7 @@ job "postgres" {
 
   group "primary" {
     constraint {
-      attribute = "${node.unique.name}"
-      operator  = "equal"
+      attribute = node.unique.name
       value     = var.primary
     }
 
@@ -139,6 +138,10 @@ job "postgres" {
         static = var.port
         to     = 5432
       }
+    }
+
+    resources {
+      memory = 2048
     }
 
     service {
@@ -158,7 +161,7 @@ job "postgres" {
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
-        ports       = ["postgres"]
+        ports       = [ "postgres" ]
         dns_servers = var.service_dns
         volumes = compact([
           var.data == "" ? "" : format("%s:/var/lib/postgresql/data", var.data)
@@ -174,18 +177,24 @@ job "postgres" {
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
         POSTGRES_REPLICATION_SLOT = join(",",local.replication_slots)
       }
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////////
   // REPLICAS
-
+/*
   group "replica" {
     count = length(var.replicas)
 
     constraint {
-        attribute = "${node.unique.name}"
-        operator  = "equal"
-        value     = var.replicas[count.index]
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = join(",",var.replicas)
+    }
+
+    constraint {
+      operator  = "distinct_hosts"
+      value     = "true"
     }
 
     network {
@@ -227,8 +236,9 @@ job "postgres" {
         POSTGRES_REPLICATION_PRIMARY  = local.replication_primary
         POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
-        POSTGRES_REPLICATION_SLOT     = local.replication_slots[count.index]
+        POSTGRES_REPLICATION_SLOT     = format("replica-%s", node.unique.name)
       }
-    }
-  } 
-} 
+    } // task
+  }  // group
+*/
+} // job 
