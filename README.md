@@ -160,14 +160,13 @@ TODO:
 PostgreSQL is a database server
 
 * [Documentation](https://www.postgresql.org/)
-* [Terraform Example](_examples/postgresql.tf)
-* [Nomad Job](postgresql/nomad/postgresql.hcl)
+* [Terraform Example](_examples/postgres.tf)
+* [Nomad Job](postgres/nomad/postgres.hcl)
 
 TODO:
 
 * [ ] LDAP integration
 * [ ] Add TLS support
-* [ ] Add replication support
 * [ ] Use volume instead when the data does not have '/' as prefix
 * [ ] Add users, databases and roles support on initialization
 
