@@ -1,5 +1,5 @@
 
-resource "nomad_job" "postgresql" {
+resource "nomad_job" "postgres" {
   count   = var.enabled ? 1 : 0
   jobspec = file("${path.module}/nomad/postgres.hcl")
 

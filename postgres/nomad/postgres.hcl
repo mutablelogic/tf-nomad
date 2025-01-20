@@ -106,7 +106,7 @@ variable "replication_password" {
 
 locals {
   data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data/pgdata"
-  replication_slots = [ for host in var.replicas : format("replica-%s", host) ]
+  replication_slots = [ for host in var.replicas : format("replica_%s", host) ]
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,10 +139,6 @@ job "postgres" {
       }
     }
 
-    resources {
-      memory = 2048
-    }
-
     service {
       tags     = ["postgres", "primary"]
       name     = format("%s-primary", var.service_name)
@@ -156,6 +152,10 @@ job "postgres" {
 
     task "server" {
       driver = "docker"
+
+      resources {
+        memory = 2048
+      }
 
       config {
         image       = var.docker_image
@@ -203,10 +203,6 @@ job "postgres" {
       }
     }
 
-    resources {
-      memory = 1024
-    }
-
     service {
       tags     = [ "postgres", "replica" ]
       name     = format("%s-replica", var.service_name)
@@ -221,6 +217,10 @@ job "postgres" {
     task "server" {
       driver = "docker"
 
+      resources {
+        memory = 1024
+      }
+
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
@@ -231,9 +231,14 @@ job "postgres" {
         ])
       }
 
+      meta {
+        primary_service_name = format("%s-primary", var.service_name)
+      }
+
       template {
         data = <<-EOH
-          {{ range nomadService "postgres-primary" }}
+          {{ $primary_service_name := env "NOMAD_META_primary_service_name" }}
+          {{ range nomadService $primary_service_name -}}
           POSTGRES_REPLICATION_PRIMARY="host={{ .Address }} port={{ .Port }}"
           {{ end }}
         EOH
@@ -248,7 +253,7 @@ job "postgres" {
         PGDATA                        = local.data_path
         POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
-        POSTGRES_REPLICATION_SLOT     = format("replica-%s", node.unique.name)
+        POSTGRES_REPLICATION_SLOT     = format("replica_%s", node.unique.name)
       }
     } // task
   }  // group
