@@ -107,7 +107,6 @@ variable "replication_password" {
 locals {
   data_path = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data/pgdata"
   replication_slots = [ for host in var.replicas : format("replica-%s", host) ]
-  replication_primary = format("host=%s port=%s", var.primary, var.port)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -146,7 +145,7 @@ job "postgres" {
 
     service {
       tags     = ["postgres", "primary"]
-      name     = var.service_name
+      name     = format("%s-primary", var.service_name)
       port     = "postgres"
       provider = var.service_provider
     }
@@ -182,7 +181,7 @@ job "postgres" {
 
   /////////////////////////////////////////////////////////////////////////////////
   // REPLICAS
-/*
+
   group "replica" {
     count = length(var.replicas)
 
@@ -204,9 +203,13 @@ job "postgres" {
       }
     }
 
+    resources {
+      memory = 1024
+    }
+
     service {
       tags     = [ "postgres", "replica" ]
-      name     = var.service_name
+      name     = format("%s-replica", var.service_name)
       port     = "postgres"
       provider = var.service_provider
     }
@@ -228,17 +231,25 @@ job "postgres" {
         ])
       }
 
+      template {
+        data = <<-EOH
+          {{ range nomadService "postgres-primary" }}
+          POSTGRES_REPLICATION_PRIMARY="host={{ .Address }} port={{ .Port }}"
+          {{ end }}
+        EOH
+        destination = "secrets/config.env"
+        env         = true
+      }
+
       env {
         POSTGRES_USER                 = var.root_user
         POSTGRES_PASSWORD             = var.root_password
         POSTGRES_DB                   = var.database
         PGDATA                        = local.data_path
-        POSTGRES_REPLICATION_PRIMARY  = local.replication_primary
         POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
         POSTGRES_REPLICATION_SLOT     = format("replica-%s", node.unique.name)
       }
     } // task
   }  // group
-*/
 } // job 

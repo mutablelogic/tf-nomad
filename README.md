@@ -112,7 +112,6 @@ TODO:
 * [ ] Add TLS certificate support
 * [ ] Not sure how we can integrate with nomad services
 
-
 ## Ollama
 
 Ollama LLM service, with the Open WebUI.
@@ -139,9 +138,8 @@ TODO:
 
 * [ ] In progress
 * [ ] Add TLS support
-* [ ] Add replication support 
+* [ ] Add replication support
 * [ ] Add custom schema support
-
 
 ## OpenLDAP Administation
 
@@ -172,7 +170,6 @@ TODO:
 * [ ] Add replication support
 * [ ] Use volume instead when the data does not have '/' as prefix
 * [ ] Add users, databases and roles support on initialization
-
 
 ## Photoprism
 
