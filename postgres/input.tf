@@ -63,6 +63,13 @@ variable "database" {
   default     = "postgres"
 }
 
+variable "databases" {
+  description = "Additional databases to create, with their passwords"
+  type        = map(string)
+  default     = {}
+  sensitive = true
+}
+
 variable "data" {
   type        = string
   description = "Directory for data persistence"
