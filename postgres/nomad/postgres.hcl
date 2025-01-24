@@ -173,13 +173,13 @@ job "postgres" {
         ])
       }
 
-      dynamic "env" {
-        for_each = var.databases
-        content {
-          name  = format("POSTGRES_PASSWORD_%s", env.key)
-          value = env.value
-        }
-      }
+      //dynamic "env" {
+      //  for_each = var.databases
+      //  content {
+      //    name  = format("POSTGRES_PASSWORD_%s", env.key)
+      //    value = env.value
+      //  }
+      //}
 
       env {
         POSTGRES_USER                 = var.root_user
