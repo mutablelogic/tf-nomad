@@ -101,6 +101,12 @@ variable "replication_password" {
   type        = string
 }
 
+variable "databases" {
+  description = "Additional databases to create, with their passwords"
+  type        = map(string)
+  default     = {}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
@@ -167,6 +173,14 @@ job "postgres" {
         ])
       }
 
+      dynamic "env" {
+        for_each = var.databases
+        content {
+          name  = format("POSTGRES_PASSWORD_%s", env.key)
+          value = env.value
+        }
+      }
+
       env {
         POSTGRES_USER                 = var.root_user
         POSTGRES_PASSWORD             = var.root_password
@@ -175,6 +189,7 @@ job "postgres" {
         POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
         POSTGRES_REPLICATION_SLOT     = join(",", local.replication_slots)
+        POSTGRES_DATABASES            = join(",", keys(var.databases))
       }
     }
   }

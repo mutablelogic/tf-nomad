@@ -18,6 +18,7 @@ resource "nomad_job" "postgres" {
       port                 = var.port
       database             = var.database
       data                 = var.data
+      databases            = jsonencode(var.databases)
       root_user            = var.root_user
       root_password        = var.root_password
       replication_user     = var.replication_user
