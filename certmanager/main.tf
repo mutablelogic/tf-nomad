@@ -16,7 +16,10 @@ resource "nomad_job" "certmanager" {
       port               = var.port
       debug              = var.debug
       database           = jsonencode(var.database)
-      database_password = var.database_password
+      database_password  = var.database_password
+      renew_before_days  = var.renew_before_days
+      renew_cert_days    = var.renew_cert_days
+      renew_ca_dats      = var.renew_ca_days
     }
   }
 }

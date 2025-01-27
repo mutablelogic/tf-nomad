@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "coredns-dns"
+  default     = "mosquitto-mqtt"
 }
 
 variable "service_dns" {
@@ -76,6 +76,9 @@ variable "data" {
 
 locals {
   DATA_PATH = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/mosquitto/data"
+  CERTMANAGER_IMAGE = "ghcr.io/mutablelogic/go-service:latest"
+  CERTMANAGER_ENDPOINT = "http://certmanager.dev.nomad:4333/"
+  CERTMANAGER_CERT = "mosquitto-${var.namespace}-${var.dc}"
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,13 +118,27 @@ job "mosquitto" {
 
     service {
       tags     = ["mosquitto", "mqtt"]
-      name     = "mosquitto-mqtt"
+      name     = var.service_name
       port     = "mqtt"
       provider = var.service_provider
     }
 
     ephemeral_disk {
       migrate = true
+    }
+
+    task "certmanager" {
+      lifecycle {
+        hook    = "prestart"
+        sidecar = false
+      }
+
+      driver = "docker"
+      config {
+        image       = local.CERTMANAGER_IMAGE
+        force_pull  = false
+        args        = ["certs"]
+      }
     }
 
     task "daemon" {

@@ -70,3 +70,20 @@ variable "database_password" {
   default     = ""
 }
 
+variable "renew_before_days" {
+  description = "Number of days to renew certificates before they expire"
+  type        = number
+  default     = 30
+}
+
+variable "renew_cert_days" {
+  description = "Number of days to renew certificates for"
+  type        = number
+  default     = 60
+}
+
+variable "renew_ca_days" {
+  description = "Number of days to renew CA's for"
+  type        = number
+  default     = 120
+}
