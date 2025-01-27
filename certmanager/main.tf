@@ -19,7 +19,7 @@ resource "nomad_job" "certmanager" {
       database_password  = var.database_password
       renew_before_days  = var.renew_before_days
       renew_cert_days    = var.renew_cert_days
-      renew_ca_dats      = var.renew_ca_days
+      renew_ca_days      = var.renew_ca_days
     }
   }
 }

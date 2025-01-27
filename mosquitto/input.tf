@@ -31,7 +31,7 @@ variable "service_provider" {
 variable "service_name" {
   description = "Service name"
   type        = string
-  default     = "coredns-dns"
+  default     = "mosquitto-mqtt"
 }
 
 variable "service_dns" {

@@ -159,7 +159,7 @@ job "certmanager" {
           var.database.user == "" ? "" : format("--pg.user=%s", var.database.user),
           var.database_password == "" ? "" : format("--pg.pass=%s", var.database_password),
           var.database.ssl_mode == "" ? "" : format("--pg.ssl-mode=%s", var.database.ssl_mode),
-          var.renew_before_days == 0 ? "" : format("--cert.review-before=%dh",var.renew_before_days * 24),
+          var.renew_before_days == 0 ? "" : format("--cert.renew-before=%dh",var.renew_before_days * 24),
           var.renew_cert_days == 0 ? "" : format("--cert.cert-renew-period=%dh",var.renew_cert_days * 24),
           var.renew_ca_days == 0 ? "" : format("--cert.ca-renew-period=%dh",var.renew_ca_days * 24),
           var.debug ? "--debug" : "",
