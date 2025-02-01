@@ -144,8 +144,7 @@ job "emby" {
 
       // Reserve 1024MB of memory
       resources {
-        memory = 1024
-        memory_max = 2048
+        memory = 2048
       }
 
       env {
