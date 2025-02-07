@@ -14,7 +14,7 @@ resource "nomad_job" "llm" {
       debug              = var.debug
       model              = var.model
       timeout            = var.timeout
-      env                = jsonencode(var.env)      
+      keys               = jsonencode(var.keys)
     }
   }
 }

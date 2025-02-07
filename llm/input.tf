@@ -40,12 +40,6 @@ variable "hosts" {
   default     = []
 }
 
-variable "debug" {
-  type        = bool
-  description = "Debugging log output"
-  default     = false
-}
-
 variable "model" {
   type        = string
   description = "Model name"
@@ -56,7 +50,7 @@ variable "timeout" {
   description = "Client timeout"
 }
 
-variable "env" {
+variable "keys" {
   type        = map(string)
   description = "Environment variables"
   default     = {}

@@ -57,7 +57,7 @@ variable "timeout" {
   description = "Client timeout"
 }
 
-variable "env" {
+variable "keys" {
   type        = map(string)
   description = "Environment variables"
   default     = {}
@@ -101,14 +101,6 @@ job "llm" {
         memory = 256
       }
 
-      dynamic "env" {
-        for_each = var.env
-        content {
-          name  = env.key
-          value = env.value
-        }
-      }
-
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
@@ -118,6 +110,13 @@ job "llm" {
           var.model,
           var.timeout == "" ? "" : format("--timeout=%s", var.timeout),
           var.debug ? "--debug" : "",
+          lookup(var.keys, "TELEGRAM_TOKEN", "") == "" ? "" : format("--token=%s", lookup(var.keys, "TELEGRAM_TOKEN", "")),
+          lookup(var.keys, "OLLAMA_URL", "") == "" ? "" : format("--ollama-endpoint=%s", lookup(var.keys, "OLLAMA_URL", "")),
+          lookup(var.keys, "ANTHROPIC_API_KEY", "") == "" ? "" : format("--anthropic-key=%s", lookup(var.keys, "ANTHROPIC_API_KEY", "")),
+          lookup(var.keys, "MISTRAL_API_KEY", "") == "" ? "" : format("--mistral-key=%s", lookup(var.keys, "MISTRAL_API_KEY", "")),
+          lookup(var.keys, "OPENAI_API_KEY", "") == "" ? "" : format("--open-ai-key=%s", lookup(var.keys, "OPENAI_API_KEY", "")),
+          lookup(var.keys, "GEMINI_API_KEY", "") == "" ? "" : format("--gemini-key=%s", lookup(var.keys, "GEMINI_API_KEY", "")),
+          lookup(var.keys, "NEWSAPI_KEY", "") == "" ? "" : format("--news-key=%s", lookup(var.keys, "NEWSAPI_KEY", "")),
         ])
       }
 
