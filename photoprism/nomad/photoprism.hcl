@@ -180,6 +180,11 @@ job "photoprism" {
         provider = var.service_provider
       }
 
+      // Reserve 1024MB of memory
+      resources {
+        memory = 1024
+      }
+
       env {
         MARIADB_AUTO_UPGRADE       = "1"
         MARIADB_INITDB_SKIP_TZINFO = "1"
@@ -208,6 +213,11 @@ job "photoprism" {
         name     = format("%s-http", var.service_name)
         port     = "photoprism"
         provider = var.service_provider
+      }
+
+      // Reserve 1024MB of memory
+      resources {
+        memory = 1024
       }
 
       env {
