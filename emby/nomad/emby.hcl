@@ -142,9 +142,9 @@ job "emby" {
     task "emby" {
       driver = "docker"
 
-      // Reserve 1024MB of memory
+      // Reserve 1536MB of memory
       resources {
-        memory = 2048
+        memory = 1536
       }
 
       env {
