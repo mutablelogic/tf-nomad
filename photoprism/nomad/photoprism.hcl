@@ -215,9 +215,9 @@ job "photoprism" {
         provider = var.service_provider
       }
 
-      // Reserve 1536MB of memory
+      // Reserve 2048MB of memory
       resources {
-        memory = 1536
+        memory = 2048
       }
 
       env {
