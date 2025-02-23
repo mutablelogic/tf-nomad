@@ -13,6 +13,7 @@ resource "nomad_job" "llm" {
       hosts              = jsonencode(var.hosts)
       debug              = var.debug
       model              = var.model
+      system             = var.system
       timeout            = var.timeout
       keys               = jsonencode(var.keys)
     }

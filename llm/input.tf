@@ -45,6 +45,11 @@ variable "model" {
   description = "Model name"
 }
 
+variable "system" {
+  type        = string
+  description = "System prompt"
+}
+
 variable "timeout" {
   type        = string
   description = "Client timeout"

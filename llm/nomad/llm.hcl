@@ -52,6 +52,11 @@ variable "model" {
   description = "Model name"
 }
 
+variable "system" {
+  type        = string
+  description = "System prompt"
+}
+
 variable "timeout" {
   type        = string
   description = "Client timeout"
@@ -110,7 +115,9 @@ job "llm" {
           var.model,
           var.timeout == "" ? "" : format("--timeout=%s", var.timeout),
           var.debug ? "--debug" : "",
-          lookup(var.keys, "TELEGRAM_TOKEN", "") == "" ? "" : format("--token=%s", lookup(var.keys, "TELEGRAM_TOKEN", "")),
+          "--system",
+	  var.system,
+          lookup(var.keys, "TELEGRAM_TOKEN", "") == "" ? "" : format("--telegram-token=%s", lookup(var.keys, "TELEGRAM_TOKEN", "")),
           lookup(var.keys, "OLLAMA_URL", "") == "" ? "" : format("--ollama-endpoint=%s", lookup(var.keys, "OLLAMA_URL", "")),
           lookup(var.keys, "ANTHROPIC_API_KEY", "") == "" ? "" : format("--anthropic-key=%s", lookup(var.keys, "ANTHROPIC_API_KEY", "")),
           lookup(var.keys, "MISTRAL_API_KEY", "") == "" ? "" : format("--mistral-key=%s", lookup(var.keys, "MISTRAL_API_KEY", "")),
