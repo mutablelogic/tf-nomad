@@ -15,10 +15,10 @@ resource "nomad_job" "immich" {
       service_provider   = var.service_provider
       service_name       = var.service_name
       service_dns        = jsonencode(var.service_dns)
-
-      port              = var.port
-      data              = var.data      
-      database          = jsonencode(var.database)
+      port               = var.port
+      data               = var.data
+      media              = jsonencode(var.media)
+      database           = jsonencode(var.database)
     }
   }
 }

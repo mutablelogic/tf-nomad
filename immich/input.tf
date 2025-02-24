@@ -54,8 +54,14 @@ variable "port" {
 
 variable "data" {
   type        = string
-  description = "Photo upload directory"
+  description = "Persistence directory for the service"
   default     = ""
+}
+
+variable "media" {
+  description = "media volumes for media files (/data, /data1, etc)"
+  type        = list(string)
+  default     = []
 }
 
 variable "database" {
