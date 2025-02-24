@@ -170,17 +170,17 @@ job "immich" {
 
       // Environment variables
       env {
-        UPLOAD_LOCATION     = local.upload_location
-        DB_HOSTNAME         = var.database.host
-        DB_PORT             = var.database.port
-        DB_DATABASE_NAME    = var.database.name
-        DB_USERNAME         = var.database.user
-        DB_PASSWORD         = var.database.password
-        DB_VECTOR_EXTENSION = "pgvector"
-        REDIS_HOSTNAME      = NOMAD_IP_redis
-        REDIS_PORT          = NOMAD_PORT_redis
-        REDIS_USERNAME      = ""
-        REDIS_PASSWORD      = ""
+        IMMICH_MEDIA_LOCATION = local.upload_location
+        DB_HOSTNAME           = var.database.host
+        DB_PORT               = var.database.port
+        DB_DATABASE_NAME      = var.database.name
+        DB_USERNAME           = var.database.user
+        DB_PASSWORD           = var.database.password
+        DB_VECTOR_EXTENSION   = "pgvector"
+        REDIS_HOSTNAME        = NOMAD_IP_redis
+        REDIS_PORT            = NOMAD_PORT_redis
+        REDIS_USERNAME        = ""
+        REDIS_PASSWORD        = ""
       }
 
       config {
