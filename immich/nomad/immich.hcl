@@ -100,11 +100,11 @@ locals {
   media = [
     for i, media in var.media : format("%s:/media%s", media, i == 0 ? "" : (i + 1))
   ]
-  volumes = compact([
+  volumes = compact(flatten([
     var.data == "" ? "" : format("%s:%s", var.data, local.upload_location),
     local.media,
     "/etc/localtime:/etc/localtime:ro",
-  ])
+  ]))
 }
 
 
