@@ -80,11 +80,33 @@ variable "data" {
   type        = string
 }
 
+variable "media" {
+  description = "media volumes for media files"
+  type        = list(string)
+  default     = []
+}
+
 variable "database" {
   description = "Database connection parameters"
   type        = object({ host = string, port = number, name = string, user = string, password = string, ssl_mode = string })
   default     = { host : "", port : 0, name : "", user : "", password : "", ssl_mode : "" }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  upload_location = "/upload"
+  media = [
+    for i, media in var.media : format("%s:/media%s", media, i == 0 ? "" : (i + 1))
+  ]
+  volumes = compact([
+    var.data == "" ? "" : format("%s:%s", var.data, local.upload_location),
+    local.media,
+    "/etc/localtime:/etc/localtime:ro",
+  ])
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
@@ -148,6 +170,7 @@ job "immich" {
 
       // Environment variables
       env {
+        UPLOAD_LOCATION     = local.upload_location
         DB_HOSTNAME         = var.database.host
         DB_PORT             = var.database.port
         DB_DATABASE_NAME    = var.database.name
@@ -158,7 +181,6 @@ job "immich" {
         REDIS_PORT          = NOMAD_PORT_redis
         REDIS_USERNAME      = ""
         REDIS_PASSWORD      = ""
-        UPLOAD_LOCATION     = "/upload"
       }
 
       config {
@@ -166,10 +188,7 @@ job "immich" {
         force_pull  = var.docker_always_pull
         ports       = ["http"]
         dns_servers = var.service_dns
-        volumes = compact([
-          var.data == "" ? "" : format("%s:/upload", var.data),
-          "/etc/localtime:/etc/localtime:ro",
-        ])
+        volumes     = local.volumes
       }
 
     } // task "server"
