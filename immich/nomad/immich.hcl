@@ -163,9 +163,9 @@ job "immich" {
     task "server" {
       driver = "docker"
 
-      // Reserve 2.5GB of memory
+      // Reserve 3GB of memory
       resources {
-        memory = 2560
+        memory = 3096
       }
 
       // Environment variables
