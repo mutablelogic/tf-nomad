@@ -29,3 +29,19 @@ module "immich" {
   mlhosts           = ["nvidia1"] // Host constaint for machine learning server
   docker_ml_runtime = "nvidia"    // Required for NVIDIA GPU
 }
+
+/*
+When you create a new instance, you need a fresh database in your PostgreSQL server.
+You can create a new database with the following commands, replacing the password
+for your 'immich' user:
+
+CREATE ROLE immich WITH LOGIN PASSWORD 'XXXXXX';
+CREATE DATABASE immich WITH OWNER 'immich';
+
+-- Run the following commands in the 'immich' database
+CREATE EXTENSION IF NOT EXISTS vector CASCADE;
+CREATE EXTENSION IF NOT EXISTS cube CASCADE;
+CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;
+*/
+
+
