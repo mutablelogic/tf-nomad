@@ -50,6 +50,14 @@ TODO:
 * [ ] Data source provisioning
 * [ ] Dashboard provisioning
 
+## immich
+
+Photo storage and sharing service
+
+* [Documentation](https://immich.app/docs/overview/introduction)
+* [Terraform Example](_examples/immich.tf)
+* [Nomad Job](immich/nomad/immich.hcl)
+
 ## InfluxDB
 
 Time-series database, which can be placed on several nodes
