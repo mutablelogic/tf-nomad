@@ -22,16 +22,16 @@ variable "docker_tag" {
   default     = "release"
 }
 
+variable "docker_ml_runtime" {
+  description = "Docker runtime for machine learning"
+  type        = string
+  default     = ""
+}
+
 variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
   default     = "nomad"
-}
-
-variable "service_name" {
-  description = "Service name"
-  type        = string
-  default     = "immich-http"
 }
 
 variable "service_dns" {
@@ -43,6 +43,12 @@ variable "service_dns" {
 variable "hosts" {
   type        = list(string)
   description = "A list of hosts that can be used to deploy on."
+  default     = []
+}
+
+variable "mlhosts" {
+  description = "machine learning hosts"
+  type        = list(string)
   default     = []
 }
 

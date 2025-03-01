@@ -17,13 +17,13 @@ variable "namespace" {
 }
 
 variable "hosts" {
-  description = "host constraint for the job, defaults to one host"
+  description = "host constraint for the job"
   type        = list(string)
   default     = []
 }
 
 variable "mlhosts" {
-  description = "machine learning host constraint for the job, defaults to one host"
+  description = "machine learning host constraint for the job"
   type        = list(string)
   default     = []
 }
@@ -32,12 +32,6 @@ variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
   default     = "nomad"
-}
-
-variable "service_name" {
-  description = "Service name"
-  type        = string
-  default     = "immich-http"
 }
 
 variable "service_dns" {
@@ -61,6 +55,12 @@ variable "docker_ml_image" {
   type        = string
 }
 
+variable "docker_ml_runtime" {
+  description = "Docker runtime for machine learning"
+  type        = string
+  default     = ""
+}
+
 variable "docker_always_pull" {
   description = "Pull docker image on every job restart"
   type        = bool
@@ -70,9 +70,15 @@ variable "docker_always_pull" {
 ///////////////////////////////////////////////////////////////////////////////
 
 variable "port" {
-  description = "Port for plaintext connections"
+  description = "Port for app connections"
   type        = number
   default     = 2283
+}
+
+variable "mlport" {
+  description = "Port for machine learning connections"
+  type        = number
+  default     = 3003
 }
 
 variable "data" {
@@ -147,10 +153,6 @@ job "immich" {
       port "redis" {
         static = 6379
       }
-
-      port "ml" {
-        static = 3003
-      }
     }
 
     service {
@@ -163,9 +165,9 @@ job "immich" {
     task "server" {
       driver = "docker"
 
-      // Reserve 3GB of memory
+      // Reserve 4GB of memory
       resources {
-        memory = 3096
+        memory = 4096
       }
 
       // Environment variables
@@ -204,6 +206,38 @@ job "immich" {
       }
 
     } // task "redis"
+  } // group "app"
+
+  /////////////////////////////////////////////////////////////////////////////////
+
+  group "ml" {
+    dynamic "constraint" {
+      for_each = length(var.mlhosts) == 0 ? [] : [join(",", var.mlhosts)]
+      content {
+        attribute = node.unique.name
+        operator  = "set_contains_any"
+        value     = constraint.value
+      }
+    }
+
+    constraint {
+      operator = "distinct_hosts"
+      value    = "true"
+    }
+
+    network {
+      port "ml" {
+        static = var.mlport
+        to     = 3003
+      }
+    }
+
+    service {
+      tags     = ["immich", "ml"]
+      name     = "immich-ml"
+      port     = "ml"
+      provider = var.service_provider
+    }
 
     task "ml" {
       driver = "docker"
@@ -215,12 +249,11 @@ job "immich" {
 
       config {
         image       = var.docker_ml_image
+        runtime     = var.docker_ml_runtime
         force_pull  = var.docker_always_pull
         ports       = ["ml"]
         dns_servers = var.service_dns
       }
-
     } // task "ml"
-
-  } // group "app"
+  } // group "mp"
 }   // job "immich"
