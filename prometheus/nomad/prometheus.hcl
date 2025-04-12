@@ -76,6 +76,35 @@ variable "flags" {
   default     = {}
 }
 
+variable "targets" {
+  description = "Targets for the prometheus job"
+  type        = map(object({
+    interval     = string
+    path         = string
+    scheme       = string
+    bearer_token = string
+    targets      = list(string)
+  }))
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LOCALS
+
+locals {
+  targets = [ for k, v in var.targets : {
+    job_name        = k
+    scrape_interval = v.interval == null ? "1m" : v.interval
+    metrics_path    = v.path == null ? "/metrics" : v.path
+    scheme          = v.scheme == null ? "http" : v.scheme
+    bearer_token    = v.bearer_token == null ? "" : v.bearer_token
+    static_configs  = [
+      {
+        targets = v.targets
+      }
+    ]
+  }]
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
@@ -129,6 +158,10 @@ job "prometheus" {
 
       resources {
         memory = 512
+      }
+
+      meta {
+        scrape_configs = indent(2, format("  %s",yamlencode(local.targets)))
       }
 
       dynamic "template" {

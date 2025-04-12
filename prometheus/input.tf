@@ -51,3 +51,14 @@ variable "data" {
   type        = string
   default     = ""
 }
+
+variable "targets" {
+  description = "List of targets to scrape"
+  type        = map(object({
+    interval     = optional(string)
+    path         = optional(string)
+    scheme       = optional(string)
+    bearer_token = optional(string)
+    targets      = list(string)
+  }))
+}

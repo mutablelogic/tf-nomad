@@ -23,6 +23,7 @@ resource "nomad_job" "prometheus" {
       flags             = jsonencode({
         "storage.tsdb.retention.time" = "1y"
       })
+      targets           = jsonencode(var.targets)
     }
   }
 }
