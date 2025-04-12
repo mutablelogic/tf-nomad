@@ -14,9 +14,9 @@ resource "nomad_job" "telegraf" {
       service_dns        = jsonencode(var.service_dns)
       service_type       = var.service_type
       hosts              = jsonencode(var.hosts)
-
       outputs            = jsonencode(var.outputs)
       inputs             = jsonencode(var.inputs)
+      ports              = jsonencode(var.ports)
     }
   }
 }

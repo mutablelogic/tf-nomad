@@ -34,12 +34,6 @@ variable "service_dns" {
   default     = []
 }
 
-variable "service_type" {
-  description = "Run as a service or system"
-  type        = string
-  default     = "service"
-}
-
 variable "hosts" {
   type        = list(string)
   description = "List of hosts to deploy on. If empty, one allocation will be created"
@@ -56,4 +50,15 @@ variable "data" {
   description = "Data persistence directory"
   type        = string
   default     = ""
+}
+
+variable "targets" {
+  description = "List of targets to scrape"
+  type        = map(object({
+    interval     = optional(string)
+    path         = optional(string)
+    scheme       = optional(string)
+    bearer_token = optional(string)
+    targets      = list(string)
+  }))
 }

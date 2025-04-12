@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 1m
+  evaluation_interval: 1m
+
+alerting:
+
+rule_files:
+
+scrape_configs:
+{{ env "NOMAD_META_scrape_configs" }}
