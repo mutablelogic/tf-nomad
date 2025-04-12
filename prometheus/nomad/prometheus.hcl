@@ -16,12 +16,6 @@ variable "namespace" {
   default     = "default"
 }
 
-variable "hosts" {
-  description = "host constraint for the job, defaults to one host"
-  type        = list(string)
-  default     = []
-}
-
 variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
@@ -40,12 +34,6 @@ variable "service_dns" {
   default     = []
 }
 
-variable "service_type" {
-  description = "Run as a service or system"
-  type        = string
-  default     = "service"
-}
-
 variable "docker_image" {
   description = "Docker image"
   type        = string
@@ -57,13 +45,13 @@ variable "docker_always_pull" {
   default     = false
 }
 
-variable "debug" {
-  description = "Debug output"
-  type        = bool
-  default     = false
-}
-
 ///////////////////////////////////////////////////////////////////////////////
+
+variable "hosts" {
+  description = "host constraint for the job"
+  type        = list(string)
+  default     = []
+}
 
 variable "port" {
   description = "Port for connections"
@@ -77,18 +65,16 @@ variable "data" {
   default     = ""
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// LOCALS
-
-locals {
-  config_path = format("%s/config", NOMAD_TASK_DIR)
+variable "configs" {
+  description = "Configuration files"
+  type        = map(string)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
 job "prometheus" {
-  type        = var.service_type
+  type        = "service"
   datacenters = var.dc
   namespace   = var.namespace
 
@@ -101,15 +87,17 @@ job "prometheus" {
   /////////////////////////////////////////////////////////////////////////////////
 
   group "prometheus" {
-    count = (length(var.hosts) == 0 || var.service_type == "system") ? 1 : length(var.hosts)
+    count = length(var.hosts)
 
-    dynamic "constraint" {
-      for_each = length(var.hosts) == 0 ? [] : [join(",", var.hosts)]
-      content {
-        attribute = node.unique.name
-        operator  = "set_contains_any"
-        value     = constraint.value
-      }
+    constraint {
+      attribute = node.unique.name
+      operator  = "set_contains_any"
+      value     = join(",", var.hosts)
+    }
+
+    constraint {
+      operator = "distinct_hosts"
+      value    = "true"
     }
 
     network {
@@ -126,8 +114,24 @@ job "prometheus" {
       provider = var.service_provider
     }
 
-    task "daemon" {
+    ephemeral_disk {
+      migrate = false
+    }
+
+    task "server" {
       driver = "docker"
+
+      resources {
+        memory = 512
+      }
+
+      dynamic "template" {
+        for_each = var.configs
+        content {
+          destination = format("${NOMAD_TASK_DIR}/%s",template.key)
+          data        = template.value
+        }
+      }
 
       config {
         image       = var.docker_image
@@ -135,10 +139,11 @@ job "prometheus" {
         ports       = ["prometheus"]
         dns_servers = var.service_dns
         volumes = compact([
-          var.data == "" ? "" : format("%s:/prometheus", var.data)
+          var.data == "" ? "" : format("%s:/prometheus", var.data),
+          "local:/etc/prometheus",
         ])
       }
 
-    } // task "daemon"
+    } // task "server"
   }   // group "prometheus"
 }     // job "prometheus"

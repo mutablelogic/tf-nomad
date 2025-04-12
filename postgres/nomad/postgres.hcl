@@ -16,12 +16,6 @@ variable "namespace" {
   default     = "default"
 }
 
-variable "hosts" {
-  description = "host constraint for the job"
-  type        = list(string)
-  default     = []
-}
-
 variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string
