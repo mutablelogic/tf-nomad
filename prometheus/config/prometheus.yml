@@ -8,5 +8,10 @@ rule_files:
 
 scrape_configs:
   - job_name: "prometheus"
+    scrape_interval: 5m
     static_configs:
       - targets: ["localhost:9090"]
+  - job_name: "telegraf"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["telegraf-prometheus.dev.nomad.:9273"]

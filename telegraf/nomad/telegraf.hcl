@@ -16,6 +16,18 @@ variable "namespace" {
   default     = "default"
 }
 
+variable "service_provider" {
+  description = "Service provider, either consul or nomad"
+  type        = string
+  default     = "nomad"
+}
+
+variable "service_name" {
+  description = "Service name"
+  type        = string
+  default     = "telegraf"
+}
+
 variable "service_dns" {
   description = "Service discovery DNS"
   type        = list(string)
@@ -26,12 +38,6 @@ variable "service_type" {
   description = "Run as a service or system"
   type        = string
   default     = "service"
-}
-
-variable "hosts" {
-  description = "host constraint for the job"
-  type        = list(string)
-  default     = []
 }
 
 variable "docker_image" {
@@ -45,6 +51,12 @@ variable "docker_always_pull" {
   default     = false
 }
 
+variable "hosts" {
+  description = "host constraint for the job"
+  type        = list(string)
+  default     = []
+}
+
 variable "outputs" {
   description = "Configuration outputs"
   type        = map(map(string))
@@ -53,6 +65,12 @@ variable "outputs" {
 variable "inputs" {
   description = "Configuration inputs"
   type        = map(map(string))
+}
+
+variable "ports" {
+  description = "Ports to expose"
+  type        = map(number)
+  default = {}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,6 +98,27 @@ job "telegraf-${ name }" {
         attribute = node.unique.name
         operator  = "set_contains_any"
         value     = constraint.value
+      }
+    }
+
+    network {
+      dynamic "port" {
+        for_each = var.ports
+        labels   = [ "$${port.key}" ]
+        content {
+          static = port.value
+          to     = port.value
+        }
+      }
+    }
+
+    dynamic "service" {
+      for_each = var.ports
+      content {
+        tags     = [var.service_name, service.key]
+        name     = format("%s-%s",var.service_name, service.key)
+        port     = service.key
+        provider = var.service_provider
       }
     }
 
@@ -158,6 +197,7 @@ job "telegraf-${ name }" {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
         dns_servers = var.service_dns
+        ports       = keys(var.ports)
         volumes = compact([
           "/:/hostfs:ro",
           "local/config:/etc/telegraf",

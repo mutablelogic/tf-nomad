@@ -55,3 +55,9 @@ variable "inputs" {
   description = "Inputs configuration"
   type        = map(map(string))
 }
+
+variable "ports" {
+  description = "Listening ports"
+  type        = map(number)
+  default     = {}
+}
