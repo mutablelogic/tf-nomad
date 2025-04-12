@@ -70,6 +70,12 @@ variable "configs" {
   type        = map(string)
 }
 
+variable "flags" {
+  description = "Configuration flags"
+  type        = map(string)
+  default     = {}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
@@ -141,6 +147,11 @@ job "prometheus" {
         volumes = compact([
           var.data == "" ? "" : format("%s:/prometheus", var.data),
           "local:/etc/prometheus",
+        ])
+        args = flatten([
+          format("--config.file=%s", "/etc/prometheus/prometheus.yml"),
+          format("--storage.tsdb.path=%s", "/prometheus"),          
+          [ for k, v in var.flags : format("--%s=%s", k, v) ]
         ])
       }
 

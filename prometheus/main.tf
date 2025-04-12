@@ -20,6 +20,9 @@ resource "nomad_job" "prometheus" {
       configs            = jsonencode({
         "prometheus.yml" = chomp(file("${path.module}/config/prometheus.yml"))
       })
+      flags             = jsonencode({
+        "storage.tsdb.retention.time" = "1y"
+      })
     }
   }
 }
