@@ -150,6 +150,11 @@ job "github-action-runner" {
     task "runner" {
       driver = "docker"
 
+      // Reserve 1GB of memory
+      resources {
+        memory = 1024
+      }
+
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
