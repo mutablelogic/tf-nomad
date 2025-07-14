@@ -78,6 +78,12 @@ variable "timezone" {
   default     = "Europe/Berlin"
 }
 
+variable "memory" {
+  description = "memory allocation"
+  type        = number
+  default     = 2048
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
@@ -142,9 +148,9 @@ job "emby" {
     task "emby" {
       driver = "docker"
 
-      // Reserve 2048MB of memory
+      // Reserve memory
       resources {
-        memory = 2048
+        memory = var.memory
       }
 
       env {
