@@ -18,6 +18,7 @@ resource "nomad_job" "emby" {
       media              = jsonencode(var.media)
       devices            = jsonencode(var.devices)
       timezone           = var.timezone
+      memory             = var.memory
     }
   }
 }
