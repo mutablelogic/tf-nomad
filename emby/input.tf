@@ -74,3 +74,10 @@ variable "timezone" {
   type        = string
   default     = "Europe/Berlin"
 }
+
+variable "memory" {
+  description = "memory reserved in MB"
+  type        = number
+  default     = 2048
+}
+
