@@ -66,7 +66,7 @@ variable "media" {
 variable "devices" {
   description = "devices"
   type        = list(string)
-  default     = ["/dev/dri", "/dev/vchiq", "/dev/video10", "/dev/video11", "/dev/video12"]
+  default     = ["/dev/dri"]
 }
 
 variable "timezone" {
