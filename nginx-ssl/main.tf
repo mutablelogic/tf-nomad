@@ -24,6 +24,7 @@ resource "nomad_job" "nginx-ssl" {
         "proxy.conf"     = chomp(file("${path.module}/config/proxy.conf"))
       })
       servers            = jsonencode(var.servers)
+      networks           = jsonencode(var.networks)
       timezone           = var.timezone
       zone               = var.zone
       email              = var.email

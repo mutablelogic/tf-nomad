@@ -99,6 +99,12 @@ variable "dns_validation" {
   default     = "http"
 }
 
+variable "networks" {
+  description = "Networks to bind to (e.g., ['lan', 'tailscale']). If empty, uses default."
+  type        = list(string)
+  default     = []
+}
+
 variable "cloudflare_api_key" {
   description = "Cloudflare API key (when dns_validation is cloudflare)"
   type        = string

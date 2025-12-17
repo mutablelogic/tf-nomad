@@ -129,6 +129,12 @@ variable "duckdns_api_key" {
   default     = ""
 }
 
+variable "networks" {
+  description = "Networks to bind to (e.g., ['lan', 'tailscale'])"
+  type        = list(string)
+  default     = []
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
@@ -163,21 +169,35 @@ job "nginx" {
     }
 
     network {
+      // Ports for each network
       dynamic "port" {
-        for_each = var.ports
-        labels   = ["${port.key}"]
+        for_each = length(var.networks) > 0 ? {
+          for pair in setproduct(keys(var.ports), var.networks) : "${pair[0]}-${pair[1]}" => {
+            name    = pair[0]
+            port    = var.ports[pair[0]]
+            network = pair[1]
+          }
+        } : var.ports
+        labels = ["${port.key}"]
         content {
-          static = port.value
-          to     = port.value
+          static       = port.value.port
+          to           = port.value.port
+          host_network = lookup(port.value, "network", null)
         }
       }
     }
 
+    // Services for each network
     dynamic "service" {
-      for_each = var.ports
+      for_each = length(var.networks) > 0 ? {
+        for pair in setproduct(keys(var.ports), var.networks) : "${pair[0]}-${pair[1]}" => {
+          name    = pair[0]
+          network = pair[1]
+        }
+      } : { for k, v in var.ports : k => { name = k, network = "" } }
       content {
-        tags     = ["nginx", "${service.key}"]
-        name     = format("%s-%s", var.service_name, service.key)
+        tags     = ["nginx", service.value.name, service.value.network]
+        name     = service.value.network != "" ? format("%s-%s-%s", var.service_name, service.value.name, service.value.network) : format("%s-%s", var.service_name, service.value.name)
         port     = service.key
         provider = var.service_provider
       }
