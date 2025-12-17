@@ -177,12 +177,18 @@ job "nginx" {
             port    = var.ports[pair[0]]
             network = pair[1]
           }
-        } : var.ports
+          } : {
+          for k, v in var.ports : k => {
+            name    = k
+            port    = v
+            network = ""
+          }
+        }
         labels = ["${port.key}"]
         content {
           static       = port.value.port
           to           = port.value.port
-          host_network = lookup(port.value, "network", null)
+          host_network = port.value.network != "" ? port.value.network : null
         }
       }
     }
@@ -196,7 +202,7 @@ job "nginx" {
         }
       } : { for k, v in var.ports : k => { name = k, network = "" } }
       content {
-        tags     = ["nginx", service.value.name, service.value.network]
+        tags     = compact(["nginx", service.value.name, service.value.network])
         name     = service.value.network != "" ? format("%s-%s-%s", var.service_name, service.value.name, service.value.network) : format("%s-%s", var.service_name, service.value.name)
         port     = service.key
         provider = var.service_provider
