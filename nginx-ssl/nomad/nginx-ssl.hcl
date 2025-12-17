@@ -168,27 +168,39 @@ job "nginx" {
       value    = "true"
     }
 
-    network {
-      // Ports for each network
-      dynamic "port" {
-        for_each = length(var.networks) > 0 ? {
-          for pair in setproduct(keys(var.ports), var.networks) : "${pair[0]}-${pair[1]}" => {
-            name    = pair[0]
-            port    = var.ports[pair[0]]
-            network = pair[1]
-          }
-          } : {
-          for k, v in var.ports : k => {
-            name    = k
-            port    = v
-            network = ""
+    // Ports without host_network (when networks is empty)
+    dynamic "network" {
+      for_each = length(var.networks) == 0 ? [1] : []
+      content {
+        dynamic "port" {
+          for_each = var.ports
+          labels   = ["${port.key}"]
+          content {
+            static = port.value
+            to     = port.value
           }
         }
-        labels = ["${port.key}"]
-        content {
-          static       = port.value.port
-          to           = port.value.port
-          host_network = port.value.network != "" ? port.value.network : null
+      }
+    }
+
+    // Ports with host_network (when networks is specified)
+    dynamic "network" {
+      for_each = length(var.networks) > 0 ? [1] : []
+      content {
+        dynamic "port" {
+          for_each = {
+            for pair in setproduct(keys(var.ports), var.networks) : "${pair[0]}-${pair[1]}" => {
+              name    = pair[0]
+              port    = var.ports[pair[0]]
+              network = pair[1]
+            }
+          }
+          labels = ["${port.key}"]
+          content {
+            static       = port.value.port
+            to           = port.value.port
+            host_network = port.value.network
+          }
         }
       }
     }
