@@ -232,6 +232,7 @@ job "openldap" {
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
+        hostname    = "${node.unique.name}.lan"
         ports       = ["ldap", "ldaps"]
         dns_servers = var.service_dns
         args        = ["--copy-service", "--loglevel", var.debug ? "debug" : "info"]
