@@ -96,3 +96,15 @@ variable "debug" {
   type        = bool
   default     = false
 }
+
+variable "tls" {
+  description = "Enable TLS (required for replication)"
+  type        = bool
+  default     = false
+}
+
+variable "tls_verify_client" {
+  description = "TLS client verification: never, allow, try, demand"
+  type        = string
+  default     = "never"
+}

@@ -118,6 +118,18 @@ variable "schema" {
   type        = map(string)
 }
 
+variable "tls" {
+  description = "Enable TLS"
+  type        = bool
+  default     = false
+}
+
+variable "tls_verify_client" {
+  description = "TLS client verification"
+  type        = string
+  default     = "never"
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
@@ -213,7 +225,8 @@ job "openldap" {
         LDAP_SEED_INTERNAL_SCHEMA_PATH = length(var.schema) == 0 ? "" : local.schema_path
         LDAP_REPLICATION               = length(var.replication_hosts) == 0 ? "false" : "true"
         LDAP_REPLICATION_HOSTS         = length(var.replication_hosts) == 0 ? "" : format("#PYTHON2BASH:%s", jsonencode(var.replication_hosts))
-        LDAP_TLS                       = "false"
+        LDAP_TLS                       = var.tls ? "true" : "false"
+        LDAP_TLS_VERIFY_CLIENT         = var.tls_verify_client
       }
 
       config {

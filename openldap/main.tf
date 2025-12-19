@@ -24,6 +24,8 @@ resource "nomad_job" "openldap" {
       replication_hosts = jsonencode(var.replication_hosts)
       organization      = var.organization
       domain            = var.domain
+      tls               = var.tls
+      tls_verify_client = var.tls_verify_client
 
       # LDIF templates which are only applied when the data directory is empty (first run)
       ldif = jsonencode({
