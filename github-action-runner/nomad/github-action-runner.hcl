@@ -133,29 +133,26 @@ job "github-action-runner" {
       }
 
       config {
-        image       = "ghcr.io/jqlang/jq"
+        image       = "curlimages/curl"
         dns_servers = var.service_dns
-        entrypoint  = ["/bin/sh", "-c"]
         args = [
+          "sh",
+          "-c",
           <<-EOF
             # Stagger requests to avoid GitHub API rate limiting
             sleep $((NOMAD_ALLOC_INDEX * 5))
             
             # Request registration token from GitHub
-            RESPONSE=$(wget -q -O - --header="Authorization: token ${var.access_token}" \
-              --post-data="" \
-              https://api.github.com/orgs/${var.organization}/actions/runners/registration-token)
+            curl -s -X "POST" -H "Authorization: token ${var.access_token}" \
+              https://api.github.com/orgs/${var.organization}/actions/runners/registration-token \
+              | awk -F'"' '/"token"/ { print $4 }' > ${local.TOKEN_PATH}
             
-            # Extract token from response using jq
-            TOKEN=$(echo "$RESPONSE" | jq -r '.token // empty')
-            
-            # Validate and save token
-            if [ -z "$TOKEN" ]; then
-              echo "ERROR: Failed to get registration token. Response: $RESPONSE" >&2
+            # Validate token was saved
+            if [ ! -s ${local.TOKEN_PATH} ]; then
+              echo "ERROR: Failed to get registration token" >&2
               exit 1
             fi
             
-            echo "$TOKEN" > ${local.TOKEN_PATH}
             echo "Successfully obtained registration token"
           EOF
         ]
