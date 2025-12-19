@@ -215,18 +215,20 @@ job "openldap" {
       }
 
       env {
-        LDAP_DOMAIN                    = var.domain
-        LDAP_ORGANISATION              = var.organization
-        LDAP_ADMIN_PASSWORD            = var.admin_password
-        LDAP_CONFIG_PASSWORD           = var.config_password
-        LDAP_RFC2307BIS_SCHEMA         = "true"
-        LDAP_REMOVE_CONFIG_AFTER_SETUP = "false"
-        LDAP_SEED_INTERNAL_LDIF_PATH   = length(var.ldif) == 0 ? "" : local.ldif_path
-        LDAP_SEED_INTERNAL_SCHEMA_PATH = length(var.schema) == 0 ? "" : local.schema_path
-        LDAP_REPLICATION               = length(var.replication_hosts) == 0 ? "false" : "true"
-        LDAP_REPLICATION_HOSTS         = length(var.replication_hosts) == 0 ? "" : format("#PYTHON2BASH:%s", jsonencode(var.replication_hosts))
-        LDAP_TLS                       = var.tls ? "true" : "false"
-        LDAP_TLS_VERIFY_CLIENT         = var.tls_verify_client
+        LDAP_DOMAIN                      = var.domain
+        LDAP_ORGANISATION                = var.organization
+        LDAP_ADMIN_PASSWORD              = var.admin_password
+        LDAP_CONFIG_PASSWORD             = var.config_password
+        LDAP_RFC2307BIS_SCHEMA           = "true"
+        LDAP_REMOVE_CONFIG_AFTER_SETUP   = "false"
+        LDAP_SEED_INTERNAL_LDIF_PATH     = length(var.ldif) == 0 ? "" : local.ldif_path
+        LDAP_SEED_INTERNAL_SCHEMA_PATH   = length(var.schema) == 0 ? "" : local.schema_path
+        LDAP_REPLICATION                 = length(var.replication_hosts) == 0 ? "false" : "true"
+        LDAP_REPLICATION_HOSTS           = length(var.replication_hosts) == 0 ? "" : format("#PYTHON2BASH:%s", jsonencode(var.replication_hosts))
+        LDAP_REPLICATION_CONFIG_SYNCPROV = "binddn=\"cn=admin,cn=config\" bindmethod=simple credentials=$LDAP_CONFIG_PASSWORD searchbase=\"cn=config\" type=refreshAndPersist retry=\"60 +\" timeout=1"
+        LDAP_REPLICATION_DB_SYNCPROV     = "binddn=\"cn=admin,$LDAP_BASE_DN\" bindmethod=simple credentials=$LDAP_ADMIN_PASSWORD searchbase=\"$LDAP_BASE_DN\" type=refreshAndPersist interval=00:00:00:10 retry=\"60 +\" timeout=1"
+        LDAP_TLS                         = var.tls ? "true" : "false"
+        LDAP_TLS_VERIFY_CLIENT           = var.tls_verify_client
       }
 
       config {
