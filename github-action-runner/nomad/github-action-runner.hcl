@@ -142,16 +142,23 @@ job "github-action-runner" {
             # Stagger requests to avoid GitHub API rate limiting
             sleep $((NOMAD_ALLOC_INDEX * 5))
             
-            # Request registration token from GitHub
-            RESPONSE=$(curl -s -X "POST" -H "Authorization: token ${var.access_token}" \
-              https://api.github.com/orgs/${var.organization}/actions/runners/registration-token)
+            echo "DEBUG: Alloc index=$NOMAD_ALLOC_INDEX, DNS servers configured"
+            echo "DEBUG: Testing DNS resolution..."
+            nslookup api.github.com || echo "DNS lookup failed"
             
-            # Extract token from response
-            TOKEN=$(echo "$RESPONSE" | awk -F\" '$2 ~ /token/ { print $4; exit }')
+            echo "DEBUG: Requesting registration token..."
+            # Request registration token from GitHub with verbose output
+            RESPONSE=$(curl -v -X "POST" -H "Authorization: token ${var.access_token}" \
+              https://api.github.com/orgs/${var.organization}/actions/runners/registration-token 2>&1)
+            
+            echo "DEBUG: Full response: $RESPONSE"
+            
+            # Extract token from response (look for token in JSON)
+            TOKEN=$(echo "$RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
             
             # Validate and save token
             if [ -z "$TOKEN" ]; then
-              echo "ERROR: Failed to get registration token. Response: $RESPONSE" >&2
+              echo "ERROR: Failed to get registration token" >&2
               exit 1
             fi
             
