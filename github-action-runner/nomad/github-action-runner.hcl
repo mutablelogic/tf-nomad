@@ -133,21 +133,21 @@ job "github-action-runner" {
       }
 
       config {
-        image       = "curlimages/curl"
+        image       = "ghcr.io/jqlang/jq"
         dns_servers = var.service_dns
+        entrypoint  = ["/bin/sh", "-c"]
         args = [
-          "sh",
-          "-c",
           <<-EOF
             # Stagger requests to avoid GitHub API rate limiting
             sleep $((NOMAD_ALLOC_INDEX * 5))
             
             # Request registration token from GitHub
-            RESPONSE=$(curl -s -X "POST" -H "Authorization: token ${var.access_token}" \
+            RESPONSE=$(wget -q -O - --header="Authorization: token ${var.access_token}" \
+              --post-data="" \
               https://api.github.com/orgs/${var.organization}/actions/runners/registration-token)
             
-            # Extract token from response (handle space after colon in JSON)
-            TOKEN=$(echo "$RESPONSE" | grep -o '"token" *: *"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"')
+            # Extract token from response using jq
+            TOKEN=$(echo "$RESPONSE" | jq -r '.token // empty')
             
             # Validate and save token
             if [ -z "$TOKEN" ]; then
