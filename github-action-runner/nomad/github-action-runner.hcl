@@ -168,7 +168,7 @@ job "github-action-runner" {
         dns_servers  = var.service_dns
         network_mode = var.network_mode
         privileged   = true
-        userns_mode = "host"
+        userns_mode  = "host"
         volumes = [
           "/var/run/docker.sock:/var/run/docker.sock",
         ]
