@@ -141,7 +141,7 @@ job "github-action-runner" {
           <<-EOF
             RESPONSE=$$(curl -s -X "POST" -H "Authorization: token ${var.access_token}" https://api.github.com/orgs/${var.organization}/actions/runners/registration-token)
             echo "API Response: $$RESPONSE" >&2
-            TOKEN=$$(echo "$$RESPONSE" | grep -o '"token":"[^"]*"' | head -1 | sed 's/"token":"//;s/"$$//')
+            TOKEN=$$(echo "$$RESPONSE" | tr ',' '\n' | grep '"token"' | cut -d'"' -f4)
             echo "Extracted token length: $${#TOKEN}" >&2
             if [ -z "$$TOKEN" ]; then
               echo "ERROR: Failed to extract token from response" >&2
