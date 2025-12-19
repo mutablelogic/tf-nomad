@@ -139,15 +139,8 @@ job "github-action-runner" {
           "sh",
           "-c",
           <<-EOF
-            RESPONSE=$$(curl -s -X "POST" -H "Authorization: token ${var.access_token}" https://api.github.com/orgs/${var.organization}/actions/runners/registration-token)
-            echo "API Response: $$RESPONSE" >&2
-            TOKEN=$$(echo "$$RESPONSE" | tr ',' '\n' | grep '"token"' | cut -d'"' -f4)
-            echo "Extracted token length: $${#TOKEN}" >&2
-            if [ -z "$$TOKEN" ]; then
-              echo "ERROR: Failed to extract token from response" >&2
-              exit 1
-            fi
-            echo "$$TOKEN" > ${local.TOKEN_PATH}
+            curl -s -X "POST" -H "Authorization: token ${var.access_token}" https://api.github.com/orgs/${var.organization}/actions/runners/registration-token \
+              | awk -F\" "\$2 ~ /token/ { print \$4; exit }" > ${local.TOKEN_PATH}
           EOF
         ]
       }
@@ -175,22 +168,15 @@ job "github-action-runner" {
           "sh",
           "-c",
           <<-EOF
-            TOKEN=$$(cat ${local.TOKEN_PATH} 2>/dev/null)
-            if [ -z "$$TOKEN" ]; then
-              echo "ERROR: Token file is empty or missing" >&2
-              cat ${local.TOKEN_PATH} >&2
-              exit 1
-            fi
-            echo "Token length: $${#TOKEN}"
-            ./config.sh \
-              --work "${local.DATA}" \
-              --name "${local.NAME}" \
-              --runnergroup "${var.group}" \
-              --labels "${local.LABELS},${node.unique.name}" \
-              --url "https://github.com/${var.organization}" \
-              --token "$$TOKEN" \
-              --unattended \
-              --replace \
+               ./config.sh \
+                 --work "${local.DATA}" \
+                 --name "${local.NAME}" \
+                 --runnergroup "${var.group}" \
+                 --labels "${local.LABELS},${node.unique.name}" \
+                 --url "https://github.com/${var.organization}" \
+                 --token $(head ${local.TOKEN_PATH}) \
+                 --unattended \
+                 --replace \
             && ./run.sh 
           EOF
         ]
