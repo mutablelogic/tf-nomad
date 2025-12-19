@@ -139,8 +139,24 @@ job "github-action-runner" {
           "sh",
           "-c",
           <<-EOF
-            curl -s -X "POST" -H "Authorization: token ${var.access_token}" https://api.github.com/orgs/${var.organization}/actions/runners/registration-token \
-              | awk -F\" "\$2 ~ /token/ { print \$4; exit }" > ${local.TOKEN_PATH}
+            # Stagger requests to avoid GitHub API rate limiting
+            sleep $((NOMAD_ALLOC_INDEX * 5))
+            
+            # Request registration token from GitHub
+            RESPONSE=$(curl -s -X "POST" -H "Authorization: token ${var.access_token}" \
+              https://api.github.com/orgs/${var.organization}/actions/runners/registration-token)
+            
+            # Extract token from response
+            TOKEN=$(echo "$RESPONSE" | awk -F\" '$2 ~ /token/ { print $4; exit }')
+            
+            # Validate and save token
+            if [ -z "$TOKEN" ]; then
+              echo "ERROR: Failed to get registration token. Response: $RESPONSE" >&2
+              exit 1
+            fi
+            
+            echo "$TOKEN" > ${local.TOKEN_PATH}
+            echo "Successfully obtained registration token"
           EOF
         ]
       }
