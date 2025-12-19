@@ -28,6 +28,12 @@ variable "service_dns" {
   default     = []
 }
 
+variable "network_mode" {
+  description = "Docker network mode (bridge, host, none)"
+  type        = string
+  default     = ""
+}
+
 variable "service_type" {
   description = "Run as a service or system"
   type        = string

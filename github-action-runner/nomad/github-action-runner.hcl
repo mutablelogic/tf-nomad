@@ -28,6 +28,12 @@ variable "service_dns" {
   default     = []
 }
 
+variable "network_mode" {
+  description = "Docker network mode (bridge, host, none)"
+  type        = string
+  default     = ""
+}
+
 variable "service_type" {
   description = "Run as a service or system"
   type        = string
@@ -133,8 +139,9 @@ job "github-action-runner" {
       }
 
       config {
-        image       = "curlimages/curl"
-        dns_servers = var.service_dns
+        image        = "curlimages/curl"
+        dns_servers  = var.service_dns
+        network_mode = var.network_mode
         args = [
           "sh",
           "-c",
@@ -156,10 +163,11 @@ job "github-action-runner" {
       }
 
       config {
-        image       = var.docker_image
-        force_pull  = var.docker_always_pull
-        dns_servers = var.service_dns
-        privileged  = true
+        image        = var.docker_image
+        force_pull   = var.docker_always_pull
+        dns_servers  = var.service_dns
+        network_mode = var.network_mode
+        privileged   = true
         userns_mode = "host"
         volumes = [
           "/var/run/docker.sock:/var/run/docker.sock",

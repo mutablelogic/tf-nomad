@@ -11,6 +11,7 @@ resource "nomad_job" "github-action-runner" {
       docker_image       = local.docker_image
       docker_always_pull = jsonencode(local.docker_always_pull)
       service_dns        = jsonencode(var.service_dns)
+      network_mode       = var.network_mode
       service_type       = var.service_type
 
       // Runner parameters
