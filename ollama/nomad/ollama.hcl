@@ -177,7 +177,6 @@ job "ollama" {
       }
 
       resources {
-        cpu    = 100
         memory = 2048
       }
     } // task "server"
@@ -215,10 +214,9 @@ job "ollama" {
     task "server" {
       driver = "docker"
 
-      // Reserve 1024MB of memory
+      // Reserve 2048MB of memory
       resources {
-        memory = 1024
-        memory_max = 2048
+        memory = 2048
       }
 
       env {
