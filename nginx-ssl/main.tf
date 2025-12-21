@@ -20,8 +20,11 @@ resource "nomad_job" "nginx-ssl" {
         "ssl.conf"       = chomp(file("${path.module}/config/ssl.conf"))
         "mimetypes.conf" = chomp(file("${path.module}/config/mimetypes.conf"))
         "fastcgi.conf"   = chomp(file("${path.module}/config/fastcgi.conf"))
-        "http.conf"      = chomp(file("${path.module}/config/http.conf"))
-        "proxy.conf"     = chomp(file("${path.module}/config/proxy.conf"))
+        "http.conf" = chomp(templatefile("${path.module}/config/http.conf", {
+          http_port_env  = local.http_port_env
+          https_port_env = local.https_port_env
+        }))
+        "proxy.conf" = chomp(file("${path.module}/config/proxy.conf"))
       })
       servers            = jsonencode(var.servers)
       networks           = jsonencode(var.networks)
