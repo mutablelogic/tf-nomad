@@ -301,7 +301,7 @@ job "nginx" {
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
-        ports       = keys(var.ports)
+        ports       = length(var.networks) > 0 ? [for pair in setproduct(keys(var.ports), var.networks) : "${pair[0]}-${pair[1]}"] : keys(var.ports)
         dns_servers = var.service_dns
         volumes = [
           "local:/config"
