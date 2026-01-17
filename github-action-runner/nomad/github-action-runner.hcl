@@ -157,9 +157,9 @@ job "github-action-runner" {
     task "runner" {
       driver = "docker"
 
-      // Reserve 1GB of memory
+      // Reserve 2GB of memory
       resources {
-        memory = 1024
+        memory = 2048
       }
 
       config {
