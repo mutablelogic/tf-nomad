@@ -61,3 +61,9 @@ variable "ports" {
   type        = map(number)
   default     = {}
 }
+
+variable "data" {
+  description = "Host paths to mount as /data0, /data1, etc."
+  type        = list(string)
+  default     = []
+}

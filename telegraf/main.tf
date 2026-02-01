@@ -1,9 +1,9 @@
 
 resource "nomad_job" "telegraf" {
-  count   = var.enabled ? 1 : 0
+  count = var.enabled ? 1 : 0
   jobspec = templatefile("${path.module}/nomad/telegraf.hcl", {
     name = var.name
-  })  
+  })
 
   hcl2 {
     vars = {
@@ -17,6 +17,7 @@ resource "nomad_job" "telegraf" {
       outputs            = jsonencode(var.outputs)
       inputs             = jsonencode(var.inputs)
       ports              = jsonencode(var.ports)
+      data               = jsonencode(var.data)
     }
   }
 }

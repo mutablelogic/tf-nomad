@@ -73,6 +73,12 @@ variable "ports" {
   default = {}
 }
 
+variable "data" {
+  description = "Host paths to mount as /data0, /data1, etc."
+  type        = list(string)
+  default     = []
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JOB
 
@@ -198,10 +204,13 @@ job "telegraf-${ name }" {
         force_pull  = var.docker_always_pull
         dns_servers = var.service_dns
         ports       = keys(var.ports)
-        volumes = compact([
-          "/:/hostfs:ro",
-          "local/config:/etc/telegraf",
-        ])
+        volumes = concat(
+          [
+            "/:/hostfs:ro",
+            "local/config:/etc/telegraf",
+          ],
+          [for i, path in var.data : "$${path}:/data$${i}"]
+        )
         args = [
           "--config-directory=/etc/telegraf"
         ]
