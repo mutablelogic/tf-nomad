@@ -8,8 +8,8 @@ resource "nomad_job" "postgres" {
       dc                 = jsonencode(var.dc)
       namespace          = var.namespace
       docker_image       = local.docker_image
-      docker_tag         = var.docker_tag
       docker_always_pull = jsonencode(local.docker_always_pull)
+      data_mount_path    = local.data_mount_path
       service_provider   = var.service_provider
       service_name       = var.service_name
       service_dns        = jsonencode(var.service_dns)

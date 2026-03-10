@@ -2,6 +2,7 @@
 locals {
   docker_image       = "ghcr.io/mutablelogic/docker-postgres:${var.docker_tag}"
   docker_always_pull = true
+  data_mount_path    = tonumber(regex("^([0-9]+)", var.docker_tag)[0]) >= 18 ? "/var/lib/postgresql" : "/var/lib/postgresql/data"
 
   primary_services = var.enabled ? (
     length(var.networks) > 0 ? [

@@ -45,10 +45,10 @@ variable "docker_image" {
   type        = string
 }
 
-variable "docker_tag" {
-  description = "Docker image tag (e.g. 17-bookworm or 18-trixie)"
+variable "data_mount_path" {
+  description = "Container path for PostgreSQL data directory"
   type        = string
-  default     = ""
+  default     = "/var/lib/postgresql/data"
 }
 
 variable "docker_always_pull" {
@@ -149,8 +149,6 @@ variable "ssl_ca" {
 // LOCALS
 
 locals {
-  // PostgreSQL 18+ uses a different volume mount path
-  data_mount_path             = tonumber(split("-", var.docker_tag)[0]) >= 18 ? "/var/lib/postgresql" : "/var/lib/postgresql/data"
   data_path                   = var.data == "" ? "/alloc/data" : "/var/lib/postgresql/data/pgdata"
   replication_slots           = [for host in var.replicas : format("replica_%s", host)]
   port_names                  = length(var.networks) > 0 ? [for n in var.networks : "postgres-${n}"] : ["postgres"]
@@ -265,7 +263,7 @@ job "postgres" {
         ports       = local.port_names
         dns_servers = var.service_dns
         volumes = concat(
-          var.data != "" ? [format("%s:%s", var.data, local.data_mount_path)] : [],
+          var.data != "" ? [format("%s:%s", var.data, var.data_mount_path)] : [],
           local.ssl_volumes
         )
       }
@@ -414,7 +412,7 @@ job "postgres" {
         ports       = local.port_names
         dns_servers = var.service_dns
         volumes = concat(
-          var.data != "" ? [format("%s:%s", var.data, local.data_mount_path)] : [],
+          var.data != "" ? [format("%s:%s", var.data, var.data_mount_path)] : [],
           local.ssl_volumes
         )
       }
