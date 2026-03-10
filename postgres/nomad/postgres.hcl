@@ -46,7 +46,7 @@ variable "docker_image" {
 }
 
 variable "docker_tag" {
-  description = "Docker image tag, used to determine PostgreSQL major version"
+  description = "Docker image tag (e.g. 17-bookworm or 18-trixie)"
   type        = string
   default     = ""
 }
@@ -113,11 +113,6 @@ variable "replication_network" {
   description = "Network to use for replication connections (defaults to first network, or no host_network if networks is empty)"
   type        = string
   default     = ""
-
-  validation {
-    condition     = var.replication_network == "" || contains(var.networks, var.replication_network)
-    error_message = "replication_network must be one of the values in networks."
-  }
 }
 
 variable "primary_memory" {
@@ -155,8 +150,7 @@ variable "ssl_ca" {
 
 locals {
   // PostgreSQL 18+ uses a different volume mount path
-  pg_version                  = tonumber(regex("^([0-9]+)", var.docker_tag)[0])
-  pg_v18plus                  = local.pg_version >= 18
+  pg_v18plus                  = tonumber(split("-", var.docker_tag)[0]) >= 18
   data_mount_path             = local.pg_v18plus ? "/var/lib/postgresql" : "/var/lib/postgresql/data"
   data_path                   = var.data == "" ? "/alloc/data" : "/var/lib/postgresql/data/pgdata"
   replication_slots           = [for host in var.replicas : format("replica_%s", host)]
