@@ -176,7 +176,6 @@ TODO:
 * [ ] LDAP integration
 * [ ] Add TLS support
 * [ ] Use volume instead when the data does not have '/' as prefix
-* [ ] Add users, databases and roles support on initialization
 
 ## Photoprism
 

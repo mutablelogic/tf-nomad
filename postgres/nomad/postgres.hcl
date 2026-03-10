@@ -34,9 +34,21 @@ variable "service_dns" {
   default     = []
 }
 
+variable "networks" {
+  description = "Networks to bind ports to"
+  type        = list(string)
+  default     = []
+}
+
 variable "docker_image" {
   description = "Docker image"
   type        = string
+}
+
+variable "docker_tag" {
+  description = "Docker image tag, used to determine PostgreSQL major version"
+  type        = string
+  default     = ""
 }
 
 variable "docker_always_pull" {
@@ -71,6 +83,7 @@ variable "database" {
 variable "data" {
   description = "Data persistence directory"
   type        = string
+  default     = ""
 }
 
 variable "root_user" {
@@ -93,20 +106,68 @@ variable "replication_user" {
 variable "replication_password" {
   description = "replication password"
   type        = string
+  default     = ""
 }
 
-variable "databases" {
-  description = "Additional databases to create, with their passwords"
-  type        = map(string)
-  default     = {}
+variable "replication_network" {
+  description = "Network to use for replication connections (defaults to first network, or no host_network if networks is empty)"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.replication_network == "" || contains(var.networks, var.replication_network)
+    error_message = "replication_network must be one of the values in networks."
+  }
+}
+
+variable "primary_memory" {
+  description = "Memory allocation in MB for the primary task"
+  type        = number
+  default     = 2048
+}
+
+variable "replica_memory" {
+  description = "Memory allocation in MB for each replica task"
+  type        = number
+  default     = 512
+}
+
+variable "ssl_cert" {
+  description = "Host path to SSL certificate file"
+  type        = string
+  default     = ""
+}
+
+variable "ssl_key" {
+  description = "Host path to SSL private key file"
+  type        = string
+  default     = ""
+}
+
+variable "ssl_ca" {
+  description = "Host path to SSL CA certificate file"
+  type        = string
+  default     = ""
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // LOCALS
 
 locals {
-  data_path         = var.data == "" ? "${NOMAD_ALLOC_DIR}/data" : "/var/lib/postgresql/data/pgdata"
-  replication_slots = [for host in var.replicas : format("replica_%s", host)]
+  // PostgreSQL 18+ uses a different volume mount path
+  pg_version                  = tonumber(regex("^([0-9]+)", var.docker_tag)[0])
+  pg_v18plus                  = local.pg_version >= 18
+  data_mount_path             = local.pg_v18plus ? "/var/lib/postgresql" : "/var/lib/postgresql/data"
+  data_path                   = var.data == "" ? "/alloc/data" : "/var/lib/postgresql/data/pgdata"
+  replication_slots           = [for host in var.replicas : format("replica_%s", host)]
+  port_names                  = length(var.networks) > 0 ? [for n in var.networks : "postgres-${n}"] : ["postgres"]
+  replication_network         = var.replication_network != "" ? var.replication_network : (length(var.networks) > 0 ? var.networks[0] : "")
+  primary_replication_service = local.replication_network != "" ? format("%s-primary-%s", var.service_name, local.replication_network) : format("%s-primary", var.service_name)
+  ssl_volumes = compact([
+    var.ssl_cert != "" ? format("%s:/etc/ssl/postgres/server.crt", var.ssl_cert) : "",
+    var.ssl_key != "" ? format("%s:/etc/ssl/postgres/server.key", var.ssl_key) : "",
+    var.ssl_ca != "" ? format("%s:/etc/ssl/postgres/ca.crt", var.ssl_ca) : "",
+  ])
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,9 +179,10 @@ job "postgres" {
   namespace   = var.namespace
 
   update {
-    min_healthy_time = "10s"
-    healthy_deadline = "5m"
-    health_check     = "task_states"
+    min_healthy_time  = "10s"
+    healthy_deadline  = "5m"
+    progress_deadline = "10m"
+    health_check      = "checks"
   }
 
   /////////////////////////////////////////////////////////////////////////////////
@@ -132,48 +194,88 @@ job "postgres" {
       value     = var.primary
     }
 
-    network {
-      port "postgres" {
-        static = var.port
-        to     = 5432
+    // Ports without host_network (when networks is empty)
+    dynamic "network" {
+      for_each = length(var.networks) == 0 ? [1] : []
+      content {
+        port "postgres" {
+          static = var.port
+          to     = 5432
+        }
       }
     }
 
-    service {
-      tags     = ["postgres", "primary"]
-      name     = format("%s-primary", var.service_name)
-      port     = "postgres"
-      provider = var.service_provider
+    // Ports with host_network (when networks is specified)
+    dynamic "network" {
+      for_each = length(var.networks) > 0 ? [1] : []
+      content {
+        dynamic "port" {
+          for_each = var.networks
+          labels   = ["postgres-${port.value}"]
+          content {
+            static       = var.port
+            to           = 5432
+            host_network = port.value
+          }
+        }
+      }
     }
 
-    ephemeral_disk {
-      migrate = false
+    // Service without networks
+    dynamic "service" {
+      for_each = length(var.networks) == 0 ? [1] : []
+      content {
+        tags     = ["postgres", "primary"]
+        name     = format("%s-primary", var.service_name)
+        port     = "postgres"
+        provider = var.service_provider
+
+        check {
+          type     = "tcp"
+          port     = "postgres"
+          interval = "15s"
+          timeout  = "3s"
+        }
+      }
+    }
+
+    // Services with networks
+    dynamic "service" {
+      for_each = length(var.networks) > 0 ? {
+        for network in var.networks : "postgres-${network}" => { network = network }
+      } : {}
+      content {
+        name     = "${var.service_name}-primary-${service.value.network}"
+        port     = service.key
+        tags     = ["postgres", "primary", service.value.network]
+        provider = var.service_provider
+
+        check {
+          type     = "tcp"
+          port     = service.key
+          interval = "15s"
+          timeout  = "3s"
+        }
+      }
     }
 
     task "server" {
       driver = "docker"
 
       resources {
-        memory = 2048
+        memory = var.primary_memory
       }
 
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
-        ports       = ["postgres"]
+        ports       = local.port_names
         dns_servers = var.service_dns
-        volumes = compact([
-          var.data == "" ? "" : format("%s:/var/lib/postgresql/data", var.data)
-        ])
+        volumes = concat(
+          var.data != "" ? [format("%s:%s", var.data, local.data_mount_path)] : [],
+          local.ssl_volumes
+        )
       }
-
-      //dynamic "env" {
-      //  for_each = var.databases
-      //  content {
-      //    name  = format("POSTGRES_PASSWORD_%s", env.key)
-      //    value = env.value
-      //  }
-      //}
 
       env {
         POSTGRES_USER                 = var.root_user
@@ -183,7 +285,9 @@ job "postgres" {
         POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
         POSTGRES_REPLICATION_SLOT     = join(",", local.replication_slots)
-        POSTGRES_DATABASES            = join(",", keys(var.databases))
+        POSTGRES_SSL_CERT             = var.ssl_cert != "" ? "/etc/ssl/postgres/server.crt" : ""
+        POSTGRES_SSL_KEY              = var.ssl_key != "" ? "/etc/ssl/postgres/server.key" : ""
+        POSTGRES_SSL_CA               = var.ssl_ca != "" ? "/etc/ssl/postgres/ca.crt" : ""
       }
     }
   }
@@ -205,22 +309,69 @@ job "postgres" {
       value    = "true"
     }
 
-    network {
-      port "postgres" {
-        static = var.port
-        to     = 5432
+    // Ports without host_network (when networks is empty)
+    dynamic "network" {
+      for_each = length(var.networks) == 0 ? [1] : []
+      content {
+        port "postgres" {
+          static = var.port
+          to     = 5432
+        }
       }
     }
 
-    service {
-      tags     = ["postgres", "replica"]
-      name     = format("%s-replica", var.service_name)
-      port     = "postgres"
-      provider = var.service_provider
+    // Ports with host_network (when networks is specified)
+    dynamic "network" {
+      for_each = length(var.networks) > 0 ? [1] : []
+      content {
+        dynamic "port" {
+          for_each = var.networks
+          labels   = ["postgres-${port.value}"]
+          content {
+            static       = var.port
+            to           = 5432
+            host_network = port.value
+          }
+        }
+      }
     }
 
-    ephemeral_disk {
-      migrate = false
+    // Service without networks
+    dynamic "service" {
+      for_each = length(var.networks) == 0 ? [1] : []
+      content {
+        tags     = ["postgres", "replica"]
+        name     = format("%s-replica", var.service_name)
+        port     = "postgres"
+        provider = var.service_provider
+
+        check {
+          type     = "tcp"
+          port     = "postgres"
+          interval = "15s"
+          timeout  = "3s"
+        }
+      }
+    }
+
+    // Services with networks
+    dynamic "service" {
+      for_each = length(var.networks) > 0 ? {
+        for network in var.networks : "postgres-${network}" => { network = network }
+      } : {}
+      content {
+        name     = "${var.service_name}-replica-${service.value.network}"
+        port     = service.key
+        tags     = ["postgres", "replica", service.value.network]
+        provider = var.service_provider
+
+        check {
+          type     = "tcp"
+          port     = service.key
+          interval = "15s"
+          timeout  = "3s"
+        }
+      }
     }
 
     task "wait-for-primary" {
@@ -229,27 +380,31 @@ job "postgres" {
         sidecar = false
       }
 
+      resources {
+        memory = 64
+      }
+
       meta {
-        primary_service_name = format("%s-primary", var.service_name)
+        primary_replication_service = local.primary_replication_service
       }
 
       template {
         data        = <<-EOH
-          {{ $primary_service_name := env "NOMAD_META_primary_service_name" }}
-          {{ range nomadService $primary_service_name -}}
+          {{ range nomadService (env "NOMAD_META_primary_replication_service") -}}
           POSTGRES_REPLICATION_PRIMARY="host={{ .Address }} port={{ .Port }}"
-          {{ end }}
+          {{ end -}}
         EOH
-        destination = "tmp/config.env"
+        destination = "local/config.env"
         env         = true
       }
 
       driver = "docker"
       config {
-        image      = var.docker_image
-        force_pull = var.docker_always_pull
-        command    = "pg_isready"
-        args       = ["-d", "${POSTGRES_REPLICATION_PRIMARY}", "-t", "60"]
+        image       = var.docker_image
+        force_pull  = var.docker_always_pull
+        command     = "pg_isready"
+        args        = ["-d", "${POSTGRES_REPLICATION_PRIMARY}", "-t", "60"]
+        dns_servers = var.service_dns
       }
     }
 
@@ -257,31 +412,32 @@ job "postgres" {
       driver = "docker"
 
       resources {
-        memory = 512
+        memory = var.replica_memory
       }
 
       config {
         image       = var.docker_image
         force_pull  = var.docker_always_pull
-        ports       = ["postgres"]
+        ports       = local.port_names
         dns_servers = var.service_dns
-        volumes = compact([
-          var.data == "" ? "" : format("%s:/var/lib/postgresql/data", var.data)
-        ])
+        volumes = concat(
+          var.data != "" ? [format("%s:%s", var.data, local.data_mount_path)] : [],
+          local.ssl_volumes
+        )
       }
 
       meta {
-        primary_service_name = format("%s-primary", var.service_name)
+        primary_replication_service = local.primary_replication_service
       }
 
       template {
         data        = <<-EOH
-          {{ $primary_service_name := env "NOMAD_META_primary_service_name" }}
-          {{ range nomadService $primary_service_name -}}
+          {{ range nomadService (env "NOMAD_META_primary_replication_service") -}}
           POSTGRES_REPLICATION_PRIMARY="host={{ .Address }} port={{ .Port }}"
-          {{ end }}
+          {{ end -}}
+          POSTGRES_REPLICATION_SLOT="replica_{{ env "node.unique.name" }}"
         EOH
-        destination = "tmp/config.env"
+        destination = "local/config.env"
         env         = true
       }
 
@@ -292,7 +448,9 @@ job "postgres" {
         PGDATA                        = local.data_path
         POSTGRES_REPLICATION_USER     = var.replication_user
         POSTGRES_REPLICATION_PASSWORD = var.replication_password
-        POSTGRES_REPLICATION_SLOT     = format("replica_%s", node.unique.name)
+        POSTGRES_SSL_CERT             = var.ssl_cert != "" ? "/etc/ssl/postgres/server.crt" : ""
+        POSTGRES_SSL_KEY              = var.ssl_key != "" ? "/etc/ssl/postgres/server.key" : ""
+        POSTGRES_SSL_CA               = var.ssl_ca != "" ? "/etc/ssl/postgres/ca.crt" : ""
       }
     } // task
   }   // group

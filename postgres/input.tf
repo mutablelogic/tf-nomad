@@ -1,7 +1,7 @@
 
 variable "dc" {
-  type        = string
-  description = "Data center name"
+  type        = list(string)
+  description = "Data center names"
 }
 
 variable "namespace" {
@@ -18,8 +18,8 @@ variable "enabled" {
 
 variable "docker_tag" {
   type        = string
-  description = "Version of the docker image to use, defaults to 17-bookworm"
-  default     = "17-bookworm"
+  description = "Version of the docker image to use, defaults to 18-trixie"
+  default     = "18-trixie"
 }
 
 variable "service_provider" {
@@ -36,6 +36,12 @@ variable "service_name" {
 
 variable "service_dns" {
   description = "Service discovery DNS"
+  type        = list(string)
+  default     = []
+}
+
+variable "networks" {
+  description = "Networks to bind ports to"
   type        = list(string)
   default     = []
 }
@@ -63,13 +69,6 @@ variable "database" {
   default     = "postgres"
 }
 
-variable "databases" {
-  description = "Additional databases to create, with their passwords"
-  type        = map(string)
-  default     = {}
-  sensitive = true
-}
-
 variable "data" {
   type        = string
   description = "Directory for data persistence"
@@ -91,11 +90,48 @@ variable "root_password" {
 variable "replication_user" {
   description = "replication user name"
   type        = string
-  default     = "replicator"
+  default     = ""
 }
 
 variable "replication_password" {
-  description = "replication password (required)"
+  description = "replication password"
   type        = string
+  default     = ""
   sensitive   = true
+}
+
+variable "replication_network" {
+  description = "Network to use for replication connections (defaults to first network)"
+  type        = string
+  default     = ""
+}
+
+variable "primary_memory" {
+  description = "Memory allocation in MB for the primary task"
+  type        = number
+  default     = 2048
+}
+
+variable "replica_memory" {
+  description = "Memory allocation in MB for each replica task"
+  type        = number
+  default     = 512
+}
+
+variable "ssl_cert" {
+  description = "Host path to SSL certificate file"
+  type        = string
+  default     = ""
+}
+
+variable "ssl_key" {
+  description = "Host path to SSL private key file"
+  type        = string
+  default     = ""
+}
+
+variable "ssl_ca" {
+  description = "Host path to SSL CA certificate file (for client certificate verification)"
+  type        = string
+  default     = ""
 }
