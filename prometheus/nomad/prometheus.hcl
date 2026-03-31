@@ -184,7 +184,7 @@ job "prometheus" {
         args = flatten([
           format("--config.file=%s", "/etc/prometheus/prometheus.yml"),
           format("--storage.tsdb.path=%s", "/prometheus"),          
-          [ for k, v in var.flags : format("--%s=%s", k, v) ]
+          [ for k, v in var.flags : trimspace(v) == "" ? format("--%s", k) : format("--%s=%s", k, v) ]
         ])
       }
 

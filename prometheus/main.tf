@@ -23,7 +23,7 @@ resource "nomad_job" "prometheus" {
           "storage.tsdb.retention.time" = "1y"
         },
         var.enable_otlp_receiver ? {
-          "web.enable-otlp-receiver" = "true"
+          "web.enable-otlp-receiver" = ""
         } : {}
       ))
       targets            = jsonencode(var.targets)
