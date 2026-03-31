@@ -46,6 +46,12 @@ variable "port" {
   default     = 9090
 }
 
+variable "enable_otlp_receiver" {
+  description = "Enable Prometheus native OTLP HTTP receiver for OpenTelemetry metrics ingestion"
+  type        = bool
+  default     = false
+}
+
 variable "data" {
   description = "Data persistence directory"
   type        = string

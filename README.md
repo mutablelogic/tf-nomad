@@ -177,6 +177,19 @@ TODO:
 * [ ] Add TLS support
 * [ ] Use volume instead when the data does not have '/' as prefix
 
+## Prometheus
+
+Prometheus is a metrics server with support for both scrape-based collection and
+native OpenTelemetry metric ingestion over OTLP HTTP.
+
+* [Documentation](https://prometheus.io/docs/guides/opentelemetry/)
+* [Terraform Example](_examples/prometheus.tf)
+* [Nomad Job](prometheus/nomad/prometheus.hcl)
+
+Set `enable_otlp_receiver = true` on the module to enable Prometheus's native
+OTLP HTTP receiver. Applications can then send OTEL metrics to the Prometheus
+service on `/api/v1/otlp/v1/metrics` using the same service port.
+
 ## Photoprism
 
 Photoprism is a photo library hosting service. It uses it's own
