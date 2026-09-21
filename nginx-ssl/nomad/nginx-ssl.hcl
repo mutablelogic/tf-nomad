@@ -306,6 +306,9 @@ job "nginx" {
         volumes = [
           "local:/config"
         ]
+        extra_hosts = [
+          "host.docker.internal:host-gateway"
+        ]
       }
 
     } // task "server"
