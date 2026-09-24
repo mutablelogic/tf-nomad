@@ -9,6 +9,7 @@ resource "nomad_job" "immich" {
       namespace          = var.namespace
       hosts              = jsonencode(var.hosts)
       mlhosts            = jsonencode(var.mlhosts)
+      ml                 = var.ml
       docker_image       = local.docker_image
       docker_redis_image = local.docker_redis_image
       docker_ml_image    = local.docker_ml_image
@@ -21,6 +22,7 @@ resource "nomad_job" "immich" {
       media              = jsonencode(var.media)
       database           = jsonencode(var.database)
       memory             = jsonencode(var.memory)
+      redis              = jsonencode(var.redis)
     }
   }
 }

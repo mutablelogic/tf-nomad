@@ -28,6 +28,18 @@ variable "docker_ml_runtime" {
   default     = ""
 }
 
+variable "ml" {
+  description = "Run the machine learning group. Set to false to use a machine learning server elsewhere (set its URL in the Immich admin settings)"
+  type        = bool
+  default     = true
+}
+
+variable "redis" {
+  description = "External Redis server. When host is empty, a Redis task runs alongside the server"
+  type        = object({ host = optional(string, ""), port = optional(number, 6379) })
+  default     = {}
+}
+
 variable "memory" {
   description = "Memory allocation (MB) for the server, redis and machine learning tasks"
   type        = object({ server = optional(number, 4096), redis = optional(number, 300), ml = optional(number, 2048) })

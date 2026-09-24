@@ -27,6 +27,16 @@ variable "memory" {
   type        = object({ server = number, redis = number, ml = number })
 }
 
+variable "redis" {
+  description = "external redis server, or empty host to run a redis task"
+  type        = object({ host = string, port = number })
+}
+
+variable "ml" {
+  description = "run the machine learning group"
+  type        = bool
+}
+
 variable "mlhosts" {
   description = "machine learning host constraint for the job"
   type        = list(string)
@@ -155,8 +165,12 @@ job "immich" {
         to     = 2283
       }
 
-      port "redis" {
-        static = 6379
+      dynamic "port" {
+        for_each = var.redis.host == "" ? ["redis"] : []
+        labels   = [port.value]
+        content {
+          static = 6379
+        }
       }
     }
 
@@ -184,8 +198,8 @@ job "immich" {
         DB_USERNAME           = var.database.user
         DB_PASSWORD           = var.database.password
         DB_VECTOR_EXTENSION   = "pgvector"
-        REDIS_HOSTNAME        = NOMAD_IP_redis
-        REDIS_PORT            = NOMAD_PORT_redis
+        REDIS_HOSTNAME        = var.redis.host == "" ? "$${NOMAD_IP_redis}" : var.redis.host
+        REDIS_PORT            = var.redis.host == "" ? "$${NOMAD_PORT_redis}" : var.redis.port
         REDIS_USERNAME        = ""
         REDIS_PASSWORD        = ""
       }
@@ -200,27 +214,32 @@ job "immich" {
 
     } // task "server"
 
-    task "redis" {
-      driver = "docker"
+    dynamic "task" {
+      for_each = var.redis.host == "" ? ["redis"] : []
+      labels   = [task.value]
+      content {
+        driver = "docker"
 
-      config {
-        image       = var.docker_redis_image
-        force_pull  = var.docker_always_pull
-        ports       = ["redis"]
-        dns_servers = var.service_dns
+        config {
+          image       = var.docker_redis_image
+          force_pull  = var.docker_always_pull
+          ports       = ["redis"]
+          dns_servers = var.service_dns
+        }
+
+        // Reserve memory
+        resources {
+          memory = var.memory.redis
+        }
       }
-
-      // Reserve memory
-      resources {
-        memory = var.memory.redis
-      }
-
     } // task "redis"
   } // group "app"
 
   /////////////////////////////////////////////////////////////////////////////////
 
   group "ml" {
+    count = var.ml ? 1 : 0
+
     dynamic "constraint" {
       for_each = length(var.mlhosts) == 0 ? [] : [join(",", var.mlhosts)]
       content {
