@@ -20,6 +20,7 @@ resource "nomad_job" "immich" {
       data               = var.data
       media              = jsonencode(var.media)
       database           = jsonencode(var.database)
+      memory             = jsonencode(var.memory)
     }
   }
 }

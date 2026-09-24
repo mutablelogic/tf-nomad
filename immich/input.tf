@@ -28,6 +28,12 @@ variable "docker_ml_runtime" {
   default     = ""
 }
 
+variable "memory" {
+  description = "Memory allocation (MB) for the server, redis and machine learning tasks"
+  type        = object({ server = optional(number, 4096), redis = optional(number, 300), ml = optional(number, 2048) })
+  default     = {}
+}
+
 variable "service_provider" {
   description = "Service provider, either consul or nomad"
   type        = string

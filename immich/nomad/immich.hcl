@@ -22,6 +22,11 @@ variable "hosts" {
   default     = []
 }
 
+variable "memory" {
+  description = "memory allocation (MB) for the server, redis and ml tasks"
+  type        = object({ server = number, redis = number, ml = number })
+}
+
 variable "mlhosts" {
   description = "machine learning host constraint for the job"
   type        = list(string)
@@ -165,9 +170,9 @@ job "immich" {
     task "server" {
       driver = "docker"
 
-      // Reserve 4GB of memory
+      // Reserve memory
       resources {
-        memory = 4096
+        memory = var.memory.server
       }
 
       // Environment variables
@@ -203,6 +208,11 @@ job "immich" {
         force_pull  = var.docker_always_pull
         ports       = ["redis"]
         dns_servers = var.service_dns
+      }
+
+      // Reserve memory
+      resources {
+        memory = var.memory.redis
       }
 
     } // task "redis"
@@ -242,9 +252,9 @@ job "immich" {
     task "ml" {
       driver = "docker"
 
-      // Reserve 2GB of memory
+      // Reserve memory
       resources {
-        memory = 2048
+        memory = var.memory.ml
       }
 
       config {
